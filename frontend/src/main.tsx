@@ -14,9 +14,11 @@ import ActivityPage from "./pages/Activity";
 import SendPage from "./pages/Send";
 import YouPage from "./pages/You";
 import WelcomePage from "./pages/Welcome";
+import LoginPage from "./pages/Login";
 
 const router = createBrowserRouter([
   { path: "/welcome", element: <WelcomePage /> },
+  { path: "/login", element: <LoginPage /> },
   {
     path: "/", element: <Shell />,
     children: [

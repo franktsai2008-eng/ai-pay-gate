@@ -72,7 +72,7 @@ export function Toast() {
 export function StatusPill({ tx }: { tx: Transaction }) {
   switch (tx.status) {
     case "pending_approval": return <Pill tone="clay">Waiting on you</Pill>;
-    case "declined": return <Pill tone="red">Declined</Pill>;
+    case "declined": return <Pill tone="red">{tx.memo?.startsWith("Blocked") ? "Blocked" : "Declined"}</Pill>;
     case "failed": return <Pill tone="red">Failed</Pill>;
     case "expired": return <Pill>Expired</Pill>;
     default: return <Pill tone="sage">Sealed</Pill>;

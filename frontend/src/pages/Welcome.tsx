@@ -21,7 +21,7 @@ export default function WelcomePage() {
             <h1 className="serif" style={{ fontSize: 30, lineHeight: 1.15, marginTop: 18 }}>Money you can hand to an AI<br />without losing sleep.</h1>
             <p className="plain" style={{ margin: "16px 0 26px" }}>One wallet for you, one for each helper you trust. Everyone is sealed before they can move a cent, and your helpers stop and ask when something's new.</p>
             <button className="btn lg block primary" onClick={() => setStep(1)}>Get sealed · 2 min</button>
-            <button className="btn lg block ghost" style={{ marginTop: 8 }} onClick={() => nav("/")}>I already have an account</button>
+            <button className="btn lg block ghost" style={{ marginTop: 8 }} onClick={() => nav("/login")}>I already have an account</button>
           </>
         ) : (
           <>

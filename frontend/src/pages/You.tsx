@@ -52,7 +52,7 @@ export default function YouPage() {
       </div>
 
       <div style={{ marginTop: 28 }} className="row">
-        <button className="btn ghost danger"><LogOut /> Sign out</button>
+        <button className="btn ghost danger" onClick={() => { localStorage.removeItem("sigil.token"); location.assign(isMock ? "/welcome" : "/login"); }}><LogOut /> Sign out</button>
         {isMock && <span className="faint small" style={{ marginLeft: "auto" }}>Running on sample data · set VITE_API_URL to use the real backend</span>}
       </div>
     </div>

@@ -80,7 +80,7 @@ export default function HelperPage() {
         {mine.map((t) => (
           <div key={t.id} className="li click" onClick={() => t.status === "pending_approval" && open(t)}>
             <PartyIcon party={parties.find((p) => p.id === t.toPartyId)} kind={t.status === "pending_approval" ? "warn" : undefined} />
-            <div className="t grow"><b><PartyName id={t.toPartyId} /></b><span>{[fmtWhen(t.createdAt), t.status === "settled" ? (t.flags.length === 0 ? "auto-approved" : "you approved") : t.status === "declined" ? "you declined" : "waiting for you", t.memo].filter(Boolean).join(" · ")}</span></div>
+            <div className="t grow"><b><PartyName id={t.toPartyId} /></b><span>{[fmtWhen(t.createdAt), t.status === "settled" ? (t.flags.length === 0 ? "auto-approved" : "you approved") : t.status === "declined" ? (t.memo?.startsWith("Blocked") ? "blocked" : "you declined") : t.status === "failed" ? "failed" : t.status === "expired" ? "expired" : "waiting for you", t.memo].filter(Boolean).join(" · ")}</span></div>
             <StatusPill tx={t} />
             <div className="amt num" style={{ minWidth: 80 }}>{fmtMoney(t.fiatAmount)}</div>
           </div>

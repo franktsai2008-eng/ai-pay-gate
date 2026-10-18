@@ -42,7 +42,7 @@ export default function WaitingPage() {
             {recent.map((t) => (
               <div key={t.id} className="li">
                 <PartyIcon party={party(t.toPartyId)} />
-                <div className="t grow"><b><PartyName id={t.initiatedBy} /> → <PartyName id={t.toPartyId} /></b><span>{t.status === "declined" ? "You declined" : "You approved"}</span></div>
+                <div className="t grow"><b><PartyName id={t.initiatedBy} /> → <PartyName id={t.toPartyId} /></b><span>{t.status === "declined" ? (t.memo?.startsWith("Blocked") ? "Blocked by the gate" : "You declined") : "You approved"}</span></div>
                 <div className="amt num" style={{ color: t.status === "declined" ? "var(--ink-3)" : undefined, textDecoration: t.status === "declined" ? "line-through" : undefined }}>{fmtMoney(t.fiatAmount)}</div>
               </div>
             ))}
