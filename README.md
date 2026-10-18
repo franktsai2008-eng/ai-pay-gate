@@ -1,10 +1,10 @@
-# AI Pay Gate
+# Sigil
 
 A safety check for payments made by AI agents. Built at HackHarvard 2026.
 
 ## What it is
 
-People are starting to let AI agents pay for things: a data feed, an API call, a report. Agents are easy to fool. A line of text in a product listing can talk an agent into sending money to a stranger. AI Pay Gate sits between the agent and its budget wallet. Every payment the agent tries is checked first and comes back with a light and a list of reasons. Green is paid. Yellow waits for the owner to approve it on her phone. Red is blocked. After a purchase, a separate Claude call checks the delivery against what the buyer asked for, and the finished trade feeds the seller's credit score. This is a hackathon build. Money movement, identity checks and the sellers are simulated. The gate, the approval flow, the delivery check and the score formulas are real code with tests.
+People are starting to let AI agents pay for things: a data feed, an API call, a report. Agents are easy to fool. A line of text in a product listing can talk an agent into sending money to a stranger. Sigil sits between the agent and its budget wallet. Every payment the agent tries is checked first and comes back with a light and a list of reasons. Green is paid. Yellow waits for the owner to approve it on her phone. Red is blocked. After a purchase, a separate Claude call checks the delivery against what the buyer asked for, and the finished trade feeds the seller's credit score. This is a hackathon build. Money movement, identity checks and the sellers are simulated. The gate, the approval flow, the delivery check and the score formulas are real code with tests.
 
 ## The three-light demo
 

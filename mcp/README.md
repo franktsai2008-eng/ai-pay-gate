@@ -15,7 +15,7 @@ Claude Desktop → Settings → Developer → Edit Config, then add:
 ```json
 {
   "mcpServers": {
-    "ai-pay-gate": {
+    "sigil": {
       "command": "node",
       "args": ["/ABSOLUTE/PATH/TO/ai-pay-gate/mcp/index.mjs"],
       "env": {

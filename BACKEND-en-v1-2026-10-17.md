@@ -1,4 +1,4 @@
-# AI Payment Safety Gate: Backend Design v1 (2026-10-17)
+# Sigil: Backend Design v1 (2026-10-17)
 
 Companion to `PLAN-en-v3-2026-10-17.md`. The plan says what the product does. This doc says how the backend is built, what is real in the demo, and in what order to build it.
 

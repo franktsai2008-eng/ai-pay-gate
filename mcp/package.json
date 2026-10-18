@@ -1,8 +1,8 @@
 {
-  "name": "ai-pay-gate-mcp",
+  "name": "sigil-mcp",
   "private": true,
   "type": "module",
-  "description": "Backup MCP server: gives Claude Desktop the agent tools of the AI Payment Gate backend. Holds only the agent token.",
+  "description": "Backup MCP server: gives Claude Desktop the agent tools of the Sigil backend. Holds only the agent token.",
   "scripts": {
     "start": "node index.mjs"
   },

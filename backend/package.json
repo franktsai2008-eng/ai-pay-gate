@@ -1,5 +1,5 @@
 {
-  "name": "ai-pay-gate-backend",
+  "name": "sigil-backend",
   "private": true,
   "type": "module",
   "scripts": {

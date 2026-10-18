@@ -25,4 +25,4 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-serve({ fetch: app.fetch, port }, (info) => console.log(`AI Payment Gate backend on http://localhost:${info.port}/api/v1 (Sigil UI contract on /v1)`));
+serve({ fetch: app.fetch, port }, (info) => console.log(`Sigil backend on http://localhost:${info.port}/api/v1 (phone app contract on /v1)`));

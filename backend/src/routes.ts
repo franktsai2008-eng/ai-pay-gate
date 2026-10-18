@@ -90,7 +90,7 @@ function agentView(a: Agent) {
 }
 
 function mcpConfig(token: string) {
-  return JSON.stringify({ mcpServers: { "ai-pay-gate": { command: "node", args: ["/path/to/mcp/dist/index.js"], env: { API_BASE: "<backend url>/api/v1", AGENT_TOKEN: token } } } });
+  return JSON.stringify({ mcpServers: { "sigil": { command: "node", args: ["/path/to/mcp/dist/index.js"], env: { API_BASE: "<backend url>/api/v1", AGENT_TOKEN: token } } } });
 }
 
 app.get("/health", (c) => c.json({ ok: true, time: new Date(now()).toISOString() }));
