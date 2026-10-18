@@ -116,7 +116,33 @@
   .deep div { font: 400 22px/1.4 var(--sans); color: var(--ink); padding-left: 24px; position: relative; }
   .deep div::before { content: ""; position: absolute; left: 0; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
 
-  /* --- slide 8/9 --- */
+  /* --- slide 7: six checks table --- */
+  .h-wide { max-width: 1560px; font-size: 48px; }
+  .checks { width: 100%; border-collapse: collapse; margin-top: 36px; font: 400 21px/1.35 var(--sans); color: var(--ink); }
+  .checks th { text-align: left; font: 500 18px/1 var(--sans); color: var(--ink-2); padding: 0 16px 12px 0; border-bottom: 2px solid var(--ink); }
+  .checks th .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: 0; }
+  .checks td { vertical-align: top; padding: 14px 20px 14px 0; border-bottom: 1px solid var(--line); }
+  .checks td:first-child { width: 40px; color: var(--ink-2); font-weight: 500; }
+  .checks td:nth-child(2) { width: 330px; }
+  .checks td:nth-child(3), .checks td:nth-child(4) { width: 640px; color: var(--ink-2); }
+  .checks td b { display: block; font-family: var(--serif); font-weight: 400; font-size: 28px; line-height: 1.1; color: var(--ink); }
+  .checks td span { display: block; color: var(--ink-2); margin-top: 4px; font-size: 18px; }
+  .checks tr.key td { background: var(--sage-soft); }
+  .checks tr.key td:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); padding-left: 12px; }
+  .checks tr.key td:last-child { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+  .tail { margin-top: 24px; font: 400 22px/1.4 var(--sans); color: var(--ink-2); max-width: 1640px; }
+
+  /* --- slide 8: credit and risk --- */
+  .score { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; margin-top: 36px; }
+  .formula { font-family: var(--serif); font-size: 28px; line-height: 1.3; padding: 12px 18px; background: var(--paper-2); border-radius: var(--r-sm); margin-bottom: 10px; }
+  .factors { margin-top: 20px; display: flex; flex-direction: column; gap: 9px; }
+  .factors div { font: 400 21px/1.35 var(--sans); color: var(--ink-2); display: grid; grid-template-columns: 170px 1fr; gap: 12px; }
+  .factors b { color: var(--ink); font-weight: 500; }
+  .score .k { font: 500 22px/1.3 var(--sans); color: var(--sage); margin-bottom: 10px; }
+  .deep.one { grid-template-columns: 1fr; gap: 10px; margin-top: 0; }
+  .deep.one div { font-size: 21px; line-height: 1.35; }
+
+  /* --- slide 9/10 --- */
   .next .lines div { font-size: 36px; line-height: 1.25; font-family: var(--serif); padding-left: 0; }
   .next .lines div::before { display: none; }
   .next .lines { gap: 36px; max-width: 900px; margin-top: 56px; }
@@ -132,6 +158,28 @@
   .learn .k { font: 500 22px/1.3 var(--sans); color: var(--ink-2); margin-bottom: 10px; }
   .learn p { font-family: var(--serif); font-size: 36px; line-height: 1.2; max-width: 900px; }
   .closing h2 { font-size: 48px; margin-top: 40px; max-width: 900px; }
+
+  /* --- market / business model / why we win --- */
+  .facts.three { grid-template-columns: 1fr 1fr 1fr; gap: 64px; max-width: 1728px; margin-top: 72px; }
+  .facts.three .big { font-size: 80px; }
+  .facts.three p { max-width: 520px; }
+  .dark .claim { margin-top: 64px; font-family: var(--serif); font-size: 36px; line-height: 1.25; color: #fff; max-width: 1500px; }
+  .dark .claim em { font-style: normal; color: var(--sage-soft); }
+  .model { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 44px; }
+  .model > div { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 36px 40px 40px; min-height: 440px; display: flex; flex-direction: column; }
+  .model > div.main { border-color: var(--sage); box-shadow: inset 0 0 0 1px var(--sage); }
+  .model .k { font: 500 20px/1.3 var(--sans); color: var(--sage); margin-bottom: 14px; }
+  .model .t { font-family: var(--serif); font-size: 36px; line-height: 1.15; letter-spacing: -.01em; }
+  .model .d { font: 400 22px/1.4 var(--sans); color: var(--ink-2); margin-top: 16px; }
+  .model .who { margin-top: auto; padding-top: 24px; border-top: 1px solid var(--line); font: 400 20px/1.4 var(--sans); color: var(--ink-2); }
+  .model .who b { font-weight: 500; color: var(--ink); display: block; margin-bottom: 4px; }
+  .rollout { display: flex; align-items: center; gap: 24px; margin-top: 40px; font: 400 22px/1.4 var(--sans); color: var(--ink-2); }
+  .rollout .k { font: 500 20px/1 var(--sans); color: var(--ink-2); margin-right: 8px; }
+  .rollout b { font-weight: 500; color: var(--ink); }
+  .rollout .sep { color: var(--ink-3); font-size: 28px; line-height: 1; }
+  .win .score { margin-top: 44px; }
+  .win .deep.one div { font-size: 22px; line-height: 1.4; }
+  .win .k { margin-bottom: 14px; }
 
   #hint { position: fixed; right: 16px; bottom: 12px; font: 500 13px/1 var(--sans); color: #b7bdb8; }
 </style>
@@ -165,7 +213,7 @@
         <p>A scammer doesn't need a big payment. $3 to the wrong address passes every limit. Sigil blocked it.</p>
       </div>
     </div>
-    <div class="foot"><span>Source: OECD AI Incidents Monitor</span><span>2 / 9</span></div>
+    <div class="foot"><span>Source: OECD AI Incidents Monitor</span><span>2 / 10</span></div>
   </section>
 
   <!-- 3 · What it is -->
@@ -175,52 +223,18 @@
         <div class="eyebrow">What Sigil does</div>
         <h2>Every payment your AI makes is checked before the money moves.</h2>
         <div class="lines">
-          <div class="sage"><b>Green</b> · paid at once</div>
-          <div class="clay"><b>Yellow</b> · stops and asks you on your phone</div>
-          <div class="red"><b>Red</b> · blocked, and the AI gets the reasons</div>
+          <div class="sage"><b>Green</b> · a seller you allowed, under your limit. Paid at once.</div>
+          <div class="clay"><b>Yellow</b> · bigger or newer than usual. Your phone asks, with the reasons. The AI's own token can't approve.</div>
+          <div class="red"><b>Red</b> · blocked. The AI gets the reasons. There is no pay-anyway button.</div>
         </div>
-        <p class="lead">You connect Claude through our MCP server. The rules live outside the model, where it can't change them. Every person, helper and business carries a seal: sealed means we know who they are.</p>
+        <p class="lead">Made for anyone with an AI, not for developers: connect your own Claude through our MCP server, set rules in plain words, approve on your phone. The rules live outside the model, where it can't change them. Every person, helper and business carries a seal: sealed means we know who they are.</p>
       </div>
       <div class="plate"><div class="crop"><img src="img/home.png" style="width:1180px;left:-203px;top:-12px" alt="Sigil home: balances, three helpers, one payment waiting on you"></div></div>
     </div>
-    <div class="foot"><span></span><span>3 / 9</span></div>
+    <div class="foot"><span></span><span>3 / 10</span></div>
   </section>
 
-  <!-- 4 · Green -->
-  <section class="slide" aria-label="Green light">
-    <div class="two">
-      <div>
-        <div class="eyebrow"><span class="dot" style="background:var(--sage)"></span>Green</div>
-        <h2>A seller you allowed, under the limit. Paid at once.</h2>
-        <div class="lines">
-          <div>Each helper gets its own wallet and its own rules: who it can pay, how much without asking, a weekly allowance.</div>
-          <div>It can never withdraw to cash or add places to its own list.</div>
-          <div>You can pause it in one tap.</div>
-        </div>
-      </div>
-      <div class="plate"><div class="crop"><img src="img/helper.png" alt="Helper page for Shopper: spent this week, rules, and what it has done"></div></div>
-    </div>
-    <div class="foot"><span></span><span>4 / 9</span></div>
-  </section>
-
-  <!-- 5 · Yellow -->
-  <section class="slide" aria-label="Yellow light">
-    <div class="two">
-      <div>
-        <div class="eyebrow"><span class="dot" style="background:var(--clay)"></span>Yellow</div>
-        <h2>Bigger or newer than usual. Your phone asks, with the reasons.</h2>
-        <div class="lines">
-          <div>More than it can spend on its own · first time paying this place</div>
-          <div>Swipe to approve, or do nothing: it expires and nothing moves.</div>
-          <div>The AI's own token can't approve. It gets a <span class="num">401</span>.</div>
-        </div>
-      </div>
-      <div class="plate centered tall"><div class="phone"><img src="img/phone-approval.png" alt="Approval card on the phone: Shopper would like to send $220 to Apple Store, with reasons and swipe to approve"></div></div>
-    </div>
-    <div class="foot"><span></span><span>5 / 9</span></div>
-  </section>
-
-  <!-- 6 · Red -->
+  <!-- 4 · Red -->
   <section class="slide" aria-label="Red light">
     <div class="two">
       <div>
@@ -246,55 +260,150 @@
         </div>
       </div>
     </div>
-    <div class="foot"><span></span><span>6 / 9</span></div>
+    <div class="foot"><span></span><span>4 / 10</span></div>
   </section>
 
-  <!-- 7 · How it works -->
-  <section class="slide" aria-label="How it works">
-    <div class="eyebrow">How it works</div>
-    <h2 style="max-width:1500px">Six checks on every payment. The first asks where the address came from.</h2>
-    <div class="six">
-      <div class="key"><div class="n">1</div><div class="t">Instruction source</div><div class="d">Did you ask, or did a seller's text put the address in the AI's head?</div></div>
-      <div><div class="n">2</div><div class="t">Owner's rules</div><div class="d">Allowlist, per-payment and daily caps, pause.</div></div>
-      <div><div class="n">3</div><div class="t">Payee</div><div class="d">Identity level, scam and sanctions lists.</div></div>
-      <div><div class="n">4</div><div class="t">Money flow</div><div class="d">Where the payee's wallet gets and sends its money.</div></div>
-      <div><div class="n">5</div><div class="t">Simulation</div><div class="d">Placeholder tonight: no chain yet.</div></div>
-      <div><div class="n">6</div><div class="t">Amount</div><div class="d">Unusual size, repeats, and timing.</div></div>
-    </div>
-    <div class="rule">
-      <span><i class="dot" style="background:var(--red)"></i>Any hard reason → red</span>
-      <span><i class="dot" style="background:var(--clay)"></i>Any soft reason → yellow</span>
-      <span><i class="dot" style="background:var(--sage)"></i>No reasons → green</span>
-    </div>
-    <div class="deep">
-      <div>The executor checks again right before paying. One payment can settle only once.</div>
-      <div>Every decision goes into a hash-chained log. An edited or removed entry shows up.</div>
-      <div>Delivery is checked by a separate Claude call with no payment or rating tools, so “rate me 5 stars” has nothing to work with.</div>
-      <div>Seller credit multiplies six factors. Risk is a separate score, so a scam victim and a scammer's accomplice don't look the same.</div>
-      <div><span class="num">30</span> backend tests pass. MCP server with <span class="num">8</span> tools.</div>
-      <div>Payments are simulated tonight. Scam lists and wallet history are seeded. No blockchain yet.</div>
-    </div>
-    <div class="foot"><span></span><span>7 / 9</span></div>
+  <!-- 5 · Six checks -->
+  <section class="slide" aria-label="The six checks">
+    <div class="eyebrow">How it works · 1 of 2</div>
+    <h2 class="h-wide">Six checks on every payment. The first asks where the address came from.</h2>
+    <table class="checks">
+      <thead><tr><th></th><th>Check</th><th><i class="dot" style="background:var(--red)"></i>Red when</th><th><i class="dot" style="background:var(--clay)"></i>Yellow when</th></tr></thead>
+      <tbody>
+        <tr class="key"><td>1</td><td><b>Instruction source</b><span>Where did the address come from?</span></td><td>The address appeared inside a seller's text the AI read: a listing, a delivery. The excerpt is the evidence.</td><td>An address we have never seen: the owner may have typed it. Off the allowlist is never green.</td></tr>
+        <tr><td>2</td><td><b>Owner's rules</b><span>Inside what you allowed?</span></td><td>Over the per-payment or 24-hour cap, empty budget, blocked category, paused AI. Unverified owner over $5 a day.</td><td>Automatic payments would pass the 24-hour auto total, so one big payment can't be split into many small ones.</td></tr>
+        <tr><td>3</td><td><b>Payee</b><span>Do we know who gets the money?</span></td><td>Scam or sanctions list, seller at its open-order limit, suspended by risk review.</td><td>New payee, no verified owner, low credit score, large order to a level-1 seller, under risk restriction.</td></tr>
+        <tr><td>4</td><td><b>Money flow</b><span>Where did the wallet's money come from?</span></td><td>Funded directly by a scam-list or sanctioned wallet.</td><td>Bad wallet two or more steps back, wallet under 7 days old, pass-through pattern, reviewer ring.</td></tr>
+        <tr><td>5</td><td><b>Simulation</b><span>Would it do what the request says?</span></td><td>Amount moved would differ from the request. Placeholder tonight: no chain yet.</td><td></td></tr>
+        <tr><td>6</td><td><b>Unusual amount</b><span>Normal for this AI?</span></td><td></td><td>Over 5× the median of its last 20 payments, more payments than usual in an hour, same address and amount within 10 minutes.</td></tr>
+      </tbody>
+    </table>
+    <p class="tail">Any hard reason → red. Any soft reason → yellow. No reasons → green. Fixed in code, the AI can't change it. The executor runs all six again right before the money moves, and every decision goes into a hash-chained log.</p>
+    <div class="foot"><span></span><span>5 / 10</span></div>
   </section>
 
-  <!-- 8 · What's next -->
-  <section class="slide next" aria-label="What's next">
-    <div class="two">
+  <!-- 6 · Credit and risk -->
+  <section class="slide" aria-label="Credit and risk scores">
+    <div class="eyebrow">How it works · 2 of 2</div>
+    <h2 class="h-wide">Credit is earned by delivering, and it is the asset: a record of who actually delivers, hard to fake.</h2>
+    <div class="score">
       <div>
-        <div class="eyebrow">What's next</div>
-        <h2>From simulated to real.</h2>
-        <div class="lines">
-          <div><span class="k">Real payments (testnet)</span>USDC on Base Sepolia through x402, with a separate signer that holds the only keys.</div>
-          <div><span class="k">Privacy</span>Stealth addresses, so outsiders can't see whom you paid.</div>
-          <div><span class="k">Disputes</span>Escrow and arbitration for sellers who don't deliver.</div>
+        <div class="formula">points per trade = outcome × amount × evidence × independence × buyer trust × 1/k</div>
+        <div class="formula">score = 100 × P ÷ (P + N + 10)</div>
+        <div class="factors">
+          <div><b>outcome</b><span>accepted +1 · silent +0.5 · refunded 0 · failed −2</span></div>
+          <div><b>amount</b><span>log10(1 + dollars), capped at 3. Volume can't buy a score.</span></div>
+          <div><b>evidence</b><span>delivered through us 1 · a link 0.7 · elsewhere 0</span></div>
+          <div><b>independence</b><span>0 / 0.3 / 1 from the funding graph, 3 wallets back. A sock puppet buyer is 0.</span></div>
+          <div><b>buyer trust</b><span>0 to 1, spreads from audited accounts through real spending. Buying from your own sellers doesn't count.</span></div>
+          <div><b>1/k · freshness</b><span>k-th trade of the same pair · points halve every 90 days · at most +10 a week</span></div>
         </div>
       </div>
-      <div class="plate"><img src="img/clay-seal.png" alt="A seal pressed into clay, lit blue"></div>
+      <div>
+        <div class="k">Hard to game</div>
+        <div class="deep one">
+          <div>One zero cancels the trade. A big amount can't rescue a puppet buyer.</div>
+          <div>Losses count in full: a seller that never delivers loses points even to a brand-new buyer.</div>
+          <div>Nightly recompute re-scores every trade, so a puppet found later loses the points it gave.</div>
+          <div>Demo: PriceFeed delivers $0.05 of prices → 1 × 0.021 × 1 × 1 × 0.8 × 1 ≈ <span class="num">+0.017</span> points. Score <span class="num">82</span>, tier 3.</div>
+        </div>
+        <div class="k" style="margin-top:28px">Risk is a separate score</div>
+        <div class="deep one">
+          <div>Spreads only from accounts confirmed as fraud, never from suspicion. <span class="num">60</span> = restricted (yellow), <span class="num">80</span> = suspended (red).</div>
+          <div>Victims are not accomplices: losing money to the scammer clears the link. Demo: FastRater <span class="num">125</span>, suspended; first-time buyer <span class="num">0</span>.</div>
+          <div><span class="num">30</span> backend tests. Delivery checked by a separate Claude call with no payment or rating tools. Payments simulated tonight; scam lists and wallet history seeded.</div>
+        </div>
+      </div>
     </div>
-    <div class="foot"><span></span><span>8 / 9</span></div>
+    <div class="foot"><span>Full tables and a worked example: docs/SCORING.md in the repo</span><span>6 / 10</span></div>
   </section>
 
-  <!-- 9 · Team and close -->
+  <!-- 7 · Market and why now -->
+  <section class="slide dark" aria-label="Market and why now">
+    <div class="eyebrow">Why now</div>
+    <h2>Agents already pay for things.<br>Nobody vouches for the other side.</h2>
+    <div class="facts three">
+      <div>
+        <div class="k">x402 · Coinbase's agent payment standard</div>
+        <div class="big num">165M+</div>
+        <p>Payments by April 2026, averaging about $0.30 each. Backed by a Linux Foundation group with Coinbase, Cloudflare, AWS, Anthropic and Circle.</p>
+      </div>
+      <div>
+        <div class="k">The rails are adding limits</div>
+        <div class="big num">Feb 2026</div>
+        <p>Coinbase ships agent wallets with spending limits per session and per payment. Limits are the easy part.</p>
+      </div>
+      <div>
+        <div class="k">Cards are coming too</div>
+        <div class="big">Live</div>
+        <p>Mastercard Agent Pay made its first live agent payment in March 2026. Visa Intelligent Commerce is in pilots with 100+ partners.</p>
+      </div>
+    </div>
+    <p class="claim">Rails move the money and cap the amount. <em>None of them asks where the instruction came from, or who is behind the payee.</em> That is the layer we build.</p>
+    <div class="foot"><span>Sources: Coinbase (Apr 2026), InfoQ, eco.com and atxp.ai comparisons (Q1 2026). Secondary sources; figures rounded.</span><span>7 / 10</span></div>
+  </section>
+
+  <!-- 8 · Business model -->
+  <section class="slide" aria-label="Business model">
+    <div class="eyebrow">Business model</div>
+    <h2 class="h-wide">Who pays, and for what.</h2>
+    <div class="model">
+      <div class="main">
+        <div class="k">Main income</div>
+        <div class="t">A small fee on every gated payment</div>
+        <div class="d">The gate, the approval flow, the phone app and the ledger. Connect once; every payment the AI makes is checked before it moves.</div>
+        <div class="who"><b>Who pays</b>Whoever owns the agent: people who let an AI buy data or book services, small companies whose AI pays suppliers or other AIs, developers whose agents pay and get paid.</div>
+      </div>
+      <div>
+        <div class="k">Second line</div>
+        <div class="t">Score and verification lookups</div>
+        <div class="d">Before dealing with an agent, check its credit score and whether a verified person stands behind it. A credit bureau for AI agents, built from finished trades that are hard to fake.</div>
+        <div class="who"><b>Who pays</b>Wallets, marketplaces and platforms that route agent payments.</div>
+      </div>
+      <div>
+        <div class="k">Third line</div>
+        <div class="t">Team plan</div>
+        <div class="d">Many agents under one verified business: shared rules, one place to approve, ledgers exported for accounting.</div>
+        <div class="who"><b>Who pays</b>Companies running a fleet of agents.</div>
+      </div>
+    </div>
+    <div class="rollout">
+      <span class="k">Rollout</span>
+      <span><b>1 · Free gate</b> for developers already on x402</span><span class="sep">→</span>
+      <span><b>2 · Score lookups</b> once enough trades have gone through</span><span class="sep">→</span>
+      <span><b>3 · Phone app</b> for small companies and individuals</span>
+    </div>
+    <div class="foot"><span>The score itself never turns into money. It only sets how much business a seller can take on.</span><span>8 / 10</span></div>
+  </section>
+
+  <!-- 9 · Why we win, and what's next -->
+  <section class="slide win" aria-label="Why we win and what's next">
+    <div class="eyebrow">Why we win</div>
+    <h2 class="h-wide">Rails move the money. We decide whether a payment is safe, and whether the other side can be trusted.</h2>
+    <div class="score">
+      <div>
+        <div class="k">What compounds</div>
+        <div class="deep one">
+          <div><b>Data flywheel.</b> Every finished trade makes the score more accurate. A better score brings more buyers, and more buyers bring more trades.</div>
+          <div><b>Bans follow the person.</b> Every agent has a verified owner. A banned owner can't come back with a new wallet. Agents of one owner count as one party and can't rate each other.</div>
+          <div><b>Evidence a rail can't offer.</b> Every decision, and every recheck before paying, is in a hash-chained log. The score is public and anyone can recompute it from the published formula.</div>
+          <div><b>Not tied to one rail.</b> The gate sits between the agent and the wallet, so it can front x402, a card, or a bank transfer.</div>
+        </div>
+      </div>
+      <div>
+        <div class="k">What's next</div>
+        <div class="deep one">
+          <div><b>Real payments on a testnet.</b> USDC on Base Sepolia through x402, with a separate signer that holds the only keys.</div>
+          <div><b>Privacy.</b> Stealth addresses, so outsiders can't see whom you paid.</div>
+          <div><b>Disputes.</b> Escrow and arbitration for sellers who don't deliver.</div>
+          <div><b>Real lists and real identity.</b> Scam and sanctions feeds instead of seeded data; a verification provider instead of the mocked button.</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Simulated tonight: payments, identity checks, sellers. Real code with 30 tests: gate, approvals, delivery check, scores.</span><span>9 / 10</span></div>
+  </section>
+
+  <!-- 10 · Team and close -->
   <section class="slide closing" aria-label="Team and close">
     <div class="two">
       <div class="plate"><img src="img/wax-seal.png" alt="Wax seal with the letter S"></div>
@@ -312,7 +421,7 @@
         <h2>Your AI can spend your money.<br>We make sure it's spending it for you.</h2>
       </div>
     </div>
-    <div class="foot"><span>github.com/franktsai2008-eng/ai-pay-gate</span><span>9 / 9</span></div>
+    <div class="foot"><span>github.com/franktsai2008-eng/ai-pay-gate</span><span>10 / 10</span></div>
   </section>
 
 </div>
