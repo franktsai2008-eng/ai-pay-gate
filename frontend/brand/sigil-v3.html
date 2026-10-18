@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Sigil — v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --char:#1f2321; --char-2:#2a2f2c; --paper:#f7f6f2; --paper-2:#efeee9; --card:#fcfcfa;
+  --ink:#1b1e1c; --ink-2:#5f6561; --ink-3:#9a9f9b; --line:#e4e3dd;
+  --sage:#2f5d4a; --sage-soft:#e3ece6; --clay:#8a5a4a; --clay-soft:#f0e6e1;
+  --serif:"Newsreader","Iowan Old Style",Georgia,serif; --sans:"Inter",-apple-system,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+.wash{background:
+  radial-gradient(1200px 600px at 20% 10%, rgba(255,255,255,.35), transparent 60%),
+  radial-gradient(900px 500px at 85% 90%, rgba(255,255,255,.25), transparent 60%),
+  linear-gradient(160deg,#7d8f86 0%,#b8c3b7 30%,#e9dfd0 60%,#c9b9a6 100%);
+  position:relative;padding:72px 64px}
+.wash::before{content:"";position:absolute;inset:0;opacity:.35;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.wash > *{position:relative}
+h1{font-family:var(--serif);font-weight:400;font-size:34px;letter-spacing:-.01em;color:var(--char)}
+.lede{color:var(--char-2);margin:8px 0 40px;max-width:640px;line-height:1.5;font-size:15px}
+section{padding:56px 64px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);font-weight:600;margin-bottom:18px}
+
+/* lockups */
+.lockups{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.lk{background:var(--card);border:1px solid var(--line);border-radius:14px;height:180px;display:flex;align-items:center;justify-content:center;gap:16px}
+.lk.dark{background:var(--char);border-color:transparent;color:#fff}
+.word{font-family:var(--serif);font-size:48px;font-weight:400;letter-spacing:-.015em;line-height:1}
+.word i{font-style:italic;font-weight:400}
+.tile{display:inline-flex;align-items:center;justify-content:center;background:var(--char);color:#fff;font-family:var(--serif);font-weight:500;border-radius:22%;}
+.tile.light{background:#fff;color:var(--char)}
+.tile.sage{background:var(--sage)}
+.strip{display:flex;gap:28px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-top:18px}
+.name{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:500}
+.name small{font-weight:400;color:var(--ink-2)}
+.sw{display:flex;gap:10px;flex-wrap:wrap}
+.sw div{width:128px;height:88px;border-radius:12px;padding:12px;font-size:11px;display:flex;flex-direction:column;justify-content:flex-end;border:1px solid var(--line)}
+.sw b{font-size:12px;display:block}
+
+/* product frame */
+.frame{background:var(--paper);border-radius:26px;overflow:hidden;display:grid;grid-template-columns:260px 1fr;min-height:720px;box-shadow:0 30px 80px -30px rgba(0,0,0,.45)}
+.side{background:var(--char);color:#dfe3e0;padding:28px 22px;display:flex;flex-direction:column}
+.side .brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.side .brand .word{font-size:26px;color:#fff}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:14px;color:#cfd4d0}
+.nav a.on{background:var(--char-2);color:#fff}
+.nav .dot{width:16px;height:16px;border-radius:4px;border:1.5px solid currentColor;opacity:.7}
+.side h5{font-size:12px;color:#8b918d;font-weight:500;margin:26px 12px 8px}
+.side .recents a{font-size:14px;color:#b7bdb8;padding:7px 12px;display:flex;gap:12px;align-items:center}
+.side .recents a::before{content:"";width:5px;height:5px;background:#8b918d;border-radius:1px}
+.side .me{margin-top:auto;display:flex;align-items:center;gap:10px;font-size:14px;color:#fff;padding:8px 12px}
+.main{padding:34px 40px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.top h3{font-family:var(--serif);font-weight:400;font-size:34px;letter-spacing:-.01em}
+.btns{display:flex;gap:8px}
+.b{padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;background:#fff;border:1px solid var(--line)}
+.b.dark{background:var(--char);color:#fff;border-color:transparent;display:flex;gap:8px;align-items:center}
+.banner{background:var(--clay-soft);border:1px solid transparent;border-radius:14px;padding:14px 16px;font-size:14px;display:flex;gap:10px;align-items:center;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px}
+.card .h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px}
+.stat{font-family:var(--serif);font-size:44px;font-weight:400;letter-spacing:-.02em;line-height:1}
+.stat small{font-family:var(--sans);font-size:13px;color:var(--sage);font-weight:500;margin-left:8px;vertical-align:middle}
+.lab{font-size:13px;color:var(--ink-2);margin-top:8px}
+.card h4{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.card .sub{font-size:13px;color:var(--ink-2);margin-top:3px}
+.sel{white-space:nowrap;font-size:12px;padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+.bars{display:flex;align-items:flex-end;gap:3px;height:140px;margin-top:26px;border-bottom:1px solid var(--line);padding-bottom:1px}
+.bars i{flex:1;min-width:2px;background:var(--char);border-radius:1px 1px 0 0;opacity:.9}
+.bars i.pale{background:#c9cdc8}
+.bars i.sage{background:var(--sage)}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink-2);margin-top:14px}
+.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--char);margin-right:6px}
+.legend span.pale::before{background:#c9cdc8}.legend span.sage::before{background:var(--sage)}.legend span.clay::before{background:var(--clay)}
+.row{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row:last-child{border:0}
+.row .who{width:104px;flex:none;font-size:13px;display:flex;align-items:center;gap:7px;font-weight:500}
+.row .bar{display:block;flex:1;height:8px;background:var(--paper-2);border-radius:4px;overflow:hidden}
+.row .bar i{display:block;height:100%;background:var(--char)}
+.row .bar i.sage{background:var(--sage)}
+.row .bar i.clay{background:var(--clay)}
+.row .v{width:56px;flex:none;text-align:right;color:var(--ink-2);font-size:13px;font-variant-numeric:tabular-nums}
+.pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:var(--sage-soft);color:var(--sage)}
+.pill.clay{background:var(--clay-soft);color:var(--clay)}
+.notes{padding:0 64px 72px;max-width:820px;color:var(--ink-2);line-height:1.65;font-size:15px}
+.notes b{color:var(--ink)}
+</style></head><body>
+
+<div class="wash">
+  <h1>Sigil</h1>
+  <p class="lede">Direction v3. Editorial serif, charcoal and warm paper, one green. Harvey's calm, pointed at a person and the helpers they trust with their money.</p>
+
+  <div class="frame">
+    <aside class="side">
+      <div class="brand"><span class="word">Sigil</span><span style="display:flex;gap:14px;opacity:.7;font-size:14px">◯ ⌕</span></div>
+      <nav class="nav">
+        <a><span class="dot" style="border-style:dashed"></span>Send money</a>
+        <a class="on"><span class="dot"></span>Home</a>
+        <a><span class="dot"></span>Helpers</a>
+        <a><span class="dot"></span>Waiting on you <span class="pill clay" style="margin-left:auto">1</span></a>
+        <a><span class="dot" style="border:0;opacity:1">···</span>More</a>
+      </nav>
+      <h5>Your helpers</h5>
+      <div class="recents">
+        <a>Shopper · Claude</a>
+        <a>Saver · GPT</a>
+        <a>Bills · Claude</a>
+      </div>
+      <h5>Recent</h5>
+      <div class="recents">
+        <a>Apple Store, $220</a>
+        <a>Weekly groceries</a>
+        <a>Rent refund from Lena</a>
+      </div>
+      <div class="me"><span class="tile" style="width:22px;height:22px;font-size:13px;border-radius:5px;background:#fff;color:var(--char)">M</span>Marco Lam</div>
+    </aside>
+
+    <div class="main">
+      <div class="top">
+        <h3>Good morning, Marco</h3>
+        <div class="btns"><span class="b">Send</span><span class="b">Receive</span><span class="b dark"><span class="tile light" style="width:18px;height:18px;font-size:12px;border-radius:4px">S</span>Ask Sigil</span></div>
+      </div>
+      <div class="banner"><span class="tile" style="width:20px;height:20px;font-size:13px;border-radius:5px">S</span>Shopper would like to pay Apple Store $220. That's more than usual and somewhere new, so it's waiting for you. <b style="margin-left:auto;font-weight:500">Have a look →</b></div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="h"><div><div class="stat">$4,218<small>↑ $31 today</small></div><div class="lab">Yours and your helpers', all in one place</div></div><div class="btns"><span class="sel">6 months ⌄</span><span class="sel">2026 ⌄</span></div></div>
+          <div class="bars" id="b1"></div>
+          <div class="legend"><span>You</span><span class="pale">Your helpers</span></div>
+        </div>
+        <div class="card">
+          <div class="h"><div><h4>Your helpers this week</h4><div class="sub">How much of their allowance each one has used</div></div><span class="sel">This week ⌄</span></div>
+          <div class="bars" id="b2" style="gap:22px;padding:0 10px"></div>
+          <div class="legend"><span>Spent</span><span class="pale">Allowance</span><span class="clay">Wants a word</span></div>
+        </div>
+        <div class="card">
+          <div class="h"><div><div class="stat">38<small>↑ 10%</small></div><div class="lab">Things your helpers did this week, every one sealed</div></div><span class="sel">Weekly ⌄</span></div>
+          <div class="bars" id="b3"></div>
+        </div>
+        <div class="card">
+          <div class="h"><div><h4>Who you deal with most</h4><div class="sub">Everyone here is sealed, so you know who they are</div></div><span class="sel">Past month ⌄</span></div>
+          <div style="margin-top:12px">
+            <div class="row"><span class="who">Wellcome <span class="tile" style="width:14px;height:14px;font-size:9px;border-radius:3px">S</span></span><span class="bar"><i style="width:92%"></i></span><span class="v">31 txns</span></div>
+            <div class="row"><span class="who">Shopper <span class="tile sage" style="width:14px;height:14px;font-size:9px;border-radius:3px">S</span></span><span class="bar"><i class="sage" style="width:78%"></i></span><span class="v">27 txns</span></div>
+            <div class="row"><span class="who">Lena <span class="tile" style="width:14px;height:14px;font-size:9px;border-radius:3px">S</span></span><span class="bar"><i style="width:60%"></i></span><span class="v">20 txns</span></div>
+            <div class="row"><span class="who">Saver <span class="tile sage" style="width:14px;height:14px;font-size:9px;border-radius:3px">S</span></span><span class="bar"><i class="sage" style="width:48%"></i></span><span class="v">16 txns</span></div>
+            <div class="row"><span class="who" style="color:var(--clay)">Apple Store</span><span class="bar"><i class="clay" style="width:12%"></i></span><span class="v">new face</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <h2>Lockups</h2>
+  <div class="lockups">
+    <div class="lk"><span class="word">Sigil</span></div>
+    <div class="lk dark"><span class="word">Sigil</span></div>
+    <div class="lk"><span class="tile" style="width:72px;height:72px;font-size:46px">S</span></div>
+    <div class="lk dark"><span class="tile light" style="width:72px;height:72px;font-size:46px">S</span></div>
+    <div class="lk"><span class="tile" style="width:36px;height:36px;font-size:23px">S</span><span class="word" style="font-size:40px">Sigil</span></div>
+    <div class="lk"><span class="word"><i>S</i>igil</span></div>
+    <div class="lk"><span class="tile sage" style="width:72px;height:72px;font-size:46px">S</span></div>
+    <div class="lk" style="font-family:var(--serif);font-size:20px;color:var(--ink-2);text-align:center;line-height:1.35;padding:0 24px">Every party sealed.<br>Every move in your hand.</div>
+  </div>
+
+  <h2 style="margin-top:44px">The tile as the seal</h2>
+  <div class="strip">
+    <div class="name">Marco <span class="tile" style="width:16px;height:16px;font-size:10px;border-radius:4px">S</span></div>
+    <div class="name">Shopper <span class="tile sage" style="width:16px;height:16px;font-size:10px;border-radius:4px">S</span> <small>· agent</small></div>
+    <div class="name">Wellcome <span class="tile" style="width:16px;height:16px;font-size:10px;border-radius:4px">S</span> <small>· business</small></div>
+    <div class="name" style="color:var(--ink-3)">Unknown wallet <span class="tile" style="width:16px;height:16px;font-size:10px;border-radius:4px;background:transparent;color:var(--ink-3);border:1.5px dashed var(--ink-3)"></span> <small>· unsealed</small></div>
+  </div>
+  <p style="font-size:13px;color:var(--ink-2);margin-top:10px">Charcoal tile = sealed person or business. Green tile = sealed agent. Dashed empty tile = unsealed. Same tile is the app icon, the "Ask Sigil" button and the badge.</p>
+
+  <h2 style="margin-top:44px">Palette</h2>
+  <div class="sw">
+    <div style="background:#1f2321;color:#fff;border-color:transparent"><b>Charcoal</b>#1F2321</div>
+    <div style="background:#f7f6f2"><b>Paper</b>#F7F6F2</div>
+    <div style="background:#fcfcfa"><b>Card</b>#FCFCFA</div>
+    <div style="background:#2f5d4a;color:#fff;border-color:transparent"><b>Sage</b>#2F5D4A · agents, up</div>
+    <div style="background:#8a5a4a;color:#fff;border-color:transparent"><b>Clay</b>#8A5A4A · needs you</div>
+    <div style="background:#c9cdc8"><b>Pale</b>#C9CDC8 · comparison</div>
+    <div style="background:linear-gradient(160deg,#4a5c58,#b9c6c1,#5b6c68);color:#fff;border-color:transparent"><b>Wash</b>painted texture, marketing only</div>
+  </div>
+</section>
+
+<div class="notes">
+  <p><b>What changed from v2:</b> warmer wash, rounder corners, and the copy talks like a person (helpers, waiting on you, wants a word). The logo is now the word, set in Newsreader, with the S monogram in a tile for everything small. No invented symbol to explain. Blue is gone; sage green carries "agent" and "up", clay carries "needs you". The phone mockup still stands for mobile, but the brand lives on this desktop command center, like Harvey.</p>
+  <p style="margin-top:12px"><b>Type:</b> Newsreader for the wordmark, headings and big numbers. Inter for everything else. Free Google font standing in for a licensed serif like Tiempos or GT Sectra if you want to buy one later.</p>
+</div>
+
+<script>
+const mk=(id,n,f)=>{const el=document.getElementById(id);el.innerHTML=Array.from({length:n},(_,i)=>f(i)).join('')};
+mk('b1',40,i=>{const h=8+Math.pow(i/40,2.2)*120+Math.sin(i/4)*3;return `<i style="height:${h}px"></i><i class="pale" style="height:${h*0.55}px"></i>`});
+mk('b2',6,i=>{const u=[72,61,48,35,28,18][i],a=[88,70,70,55,50,40][i];return `<div style="flex:1;display:flex;gap:4px;align-items:flex-end;height:100%"><i style="flex:1;height:${u*1.4}px;background:${i==3?'var(--clay)':'var(--char)'}"></i><i class="pale" style="flex:1;height:${a*1.4}px"></i></div>`});
+mk('b3',40,i=>{const h=10+(i<18?i*2:36+Math.pow((i-18)/22,1.4)*90);return `<i style="height:${h}px"></i>`});
+</script>
+</body></html>

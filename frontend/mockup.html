@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sigil — mockup v1</title>
+<style>
+  :root{
+    --bg:#f5f5f3; --paper:#ffffff; --ink:#1c1c1a; --ink-2:#6b6b66; --ink-3:#a3a39d;
+    --line:#e8e8e4; --tint:#f0efea;
+    --green:#1f8a5b; --green-soft:#e4f4ec; --amber:#b7791f; --amber-soft:#fbf1dc;
+    --red:#c0392b; --red-soft:#fae6e3; --blue:#2f6fed; --blue-soft:#e6eefc;
+    --r:18px; --r-sm:12px;
+    --shadow:0 1px 2px rgba(0,0,0,.04), 0 12px 40px -12px rgba(0,0,0,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"SF Pro Text",Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;padding:48px 40px}
+  h1{font-size:28px;letter-spacing:-.02em;font-weight:600}
+  .lede{color:var(--ink-2);margin:8px 0 36px;max-width:640px;line-height:1.5}
+  .row{display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start}
+  .frame{width:390px;flex:none}
+  .label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin:0 0 10px 8px;font-weight:600}
+  .phone{background:var(--paper);border:1px solid var(--line);border-radius:44px;height:844px;padding:20px 20px 0;box-shadow:var(--shadow);overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .status{display:flex;justify-content:space-between;font-size:14px;font-weight:600;padding:8px 10px 18px}
+  .screen{flex:1;overflow:hidden}
+  .tabs{display:flex;justify-content:space-around;border-top:1px solid var(--line);padding:14px 0 26px;margin:0 -20px;background:var(--paper)}
+  .tab{font-size:11px;color:var(--ink-3);text-align:center;font-weight:500}
+  .tab .ic{width:26px;height:26px;border-radius:8px;background:var(--tint);margin:0 auto 5px}
+  .tab.on{color:var(--ink)} .tab.on .ic{background:var(--ink)}
+
+  .h{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+  .h h2{font-size:30px;font-weight:600;letter-spacing:-.03em}
+  .h .sub{font-size:14px;color:var(--ink-2);margin-top:4px}
+  .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#ffd5a8,#f3a66a);position:relative}
+  .verified{position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;border-radius:50%;background:var(--blue);border:2px solid #fff;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:12px}
+  .card.tint{background:var(--tint);border-color:transparent}
+  .card.dark{background:var(--ink);color:#fff;border-color:transparent}
+  .eyebrow{font-size:12px;color:var(--ink-2);font-weight:500;letter-spacing:.02em}
+  .dark .eyebrow{color:rgba(255,255,255,.6)}
+  .big{font-size:40px;font-weight:600;letter-spacing:-.03em;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+  .delta{font-size:13px;color:var(--green);font-weight:500}
+  .dark .delta{color:#7fe0b0}
+  .actions{display:flex;gap:10px;margin:16px 0 4px}
+  .btn{flex:1;text-align:center;padding:13px;border-radius:14px;font-weight:600;font-size:14px;background:var(--tint);color:var(--ink)}
+  .btn.primary{background:var(--ink);color:#fff}
+  .dark .btn{background:rgba(255,255,255,.14);color:#fff}
+  .dark .btn.primary{background:#fff;color:var(--ink)}
+  .btn.ok{background:var(--green);color:#fff}
+  .btn.ghost{background:transparent;border:1px solid var(--line)}
+
+  .sec{font-size:13px;font-weight:600;color:var(--ink-2);margin:20px 0 10px;display:flex;justify-content:space-between}
+  .sec a{color:var(--blue);font-weight:500}
+  .li{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .li:last-child{border-bottom:0}
+  .ic{width:40px;height:40px;border-radius:12px;background:var(--tint);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+  .ic.bot{background:var(--blue-soft)}
+  .ic.ok{background:var(--green-soft)}
+  .ic.warn{background:var(--amber-soft)}
+  .li .t{flex:1;min-width:0}
+  .li .t b{display:block;font-weight:600;font-size:15px}
+  .li .t span{font-size:13px;color:var(--ink-2)}
+  .amt{font-weight:600;font-size:15px;font-variant-numeric:tabular-nums;text-align:right}
+  .amt small{display:block;font-weight:400;color:var(--ink-3);font-size:12px}
+  .pill{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--tint);color:var(--ink-2)}
+  .pill.ok{background:var(--green-soft);color:var(--green)}
+  .pill.warn{background:var(--amber-soft);color:var(--amber)}
+  .pill.live{background:var(--green-soft);color:var(--green)}
+  .pill.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:1px}
+  .pill.paused{background:var(--tint);color:var(--ink-3)}
+
+  .kv{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .kv:last-child{border:0}
+  .kv span:first-child{color:var(--ink-2)}
+  .kv b{font-weight:600}
+  .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:8px}
+  .bar i{display:block;height:100%;background:var(--ink);border-radius:99px}
+  .toggle{width:44px;height:26px;border-radius:99px;background:var(--green);position:relative;flex:none}
+  .toggle::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+  .toggle.off{background:var(--line)} .toggle.off::after{right:auto;left:3px}
+
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:34px 34px 44px 44px;padding:14px 22px 36px;box-shadow:0 -10px 50px rgba(0,0,0,.12);border-top:1px solid var(--line)}
+  .grab{width:36px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 18px}
+  .dim{position:absolute;inset:0;background:rgba(28,28,26,.35)}
+  .ask{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.25}
+  .ask em{font-style:normal;color:var(--blue)}
+  .plain{font-size:14px;color:var(--ink-2);line-height:1.5;margin:10px 0 16px}
+  .check{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink-2);padding:7px 0}
+  .check i{width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;font-style:normal;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none}
+  .check i.x{background:var(--amber)}
+
+  .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--tint);padding:12px 14px;border-radius:12px;word-break:break-all;color:var(--ink-2)}
+  .logo{display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;font-weight:600;font-size:15px}
+  .logo .sq{width:34px;height:34px;border-radius:10px;flex:none}
+  .center{text-align:center;padding-top:70px}
+  .mark{width:112px;height:112px;border-radius:36px;margin:0 auto 28px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:#fff;font-size:56px}
+  .center h2{font-size:30px;letter-spacing:-.03em;font-weight:600;line-height:1.15}
+  .center p{color:var(--ink-2);margin:12px 20px 30px;line-height:1.5;font-size:15px}
+  .wide{width:100%;display:block;padding:16px;border-radius:16px;background:var(--ink);color:#fff;font-weight:600;text-align:center;font-size:16px;margin-bottom:10px}
+  .wide.soft{background:var(--tint);color:var(--ink)}
+  .sym{display:inline-flex;align-items:center;gap:6px;background:var(--blue-soft);color:var(--blue);padding:6px 12px;border-radius:999px;font-weight:600;font-size:13px;margin-top:16px}
+  .notes{margin-top:48px;max-width:760px;color:var(--ink-2);line-height:1.6;font-size:15px}
+  .notes b{color:var(--ink)}
+</style>
+</head>
+<body>
+<h1>Sigil — mockup v1</h1>
+<p class="lede">Five screens showing the direction: a wallet your mom could use, with agents as first-class members of the household that you can watch and pause from your pocket. Nothing here is wired up.</p>
+
+<div class="row">
+
+<!-- 1. WELCOME / VERIFY -->
+<div class="frame">
+  <p class="label">1 · Welcome & verify</p>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>●●● ▲</span></div>
+    <div class="screen center">
+      <div class="mark">◍</div>
+      <h2>Money you can<br>actually understand.</h2>
+      <p>One wallet for you, and one for each helper you trust. Every person and every agent is verified before they can move a cent.</p>
+      <a class="wide">Get verified · 2 min</a>
+      <a class="wide soft">I already have an account</a>
+      <div class="sym">◍ Verified mark · shown next to every name</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. HOME -->
+<div class="frame">
+  <p class="label">2 · Home</p>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>●●● ▲</span></div>
+    <div class="screen">
+      <div class="h">
+        <div><h2>Good morning, Marco</h2><div class="sub">Everything's quiet. 2 agents working.</div></div>
+        <div class="avatar"><div class="verified">◍</div></div>
+      </div>
+      <div class="card dark">
+        <div class="eyebrow">Total across all wallets</div>
+        <div class="big">$4,218.40</div>
+        <div class="delta">▲ $31.10 today</div>
+        <div class="actions"><a class="btn primary">Send</a><a class="btn">Receive</a><a class="btn">Top up</a></div>
+      </div>
+      <div class="sec">Your wallets <a>See all</a></div>
+      <div class="card" style="padding:4px 18px">
+        <div class="li"><div class="ic">👤</div><div class="t"><b>Me</b><span>Main wallet</span></div><div class="amt">$3,120.00</div></div>
+        <div class="li"><div class="ic bot">✦</div><div class="t"><b>Shopper <span class="pill live">live</span></b><span>Claude · buys groceries weekly</span></div><div class="amt">$640.00<small>$500/wk limit</small></div></div>
+        <div class="li"><div class="ic bot">✦</div><div class="t"><b>Saver <span class="pill paused">paused</span></b><span>GPT · moves spare change</span></div><div class="amt">$458.40</div></div>
+      </div>
+      <div class="sec">Today</div>
+      <div class="li"><div class="ic ok">↓</div><div class="t"><b>Rent refund</b><span>from Lena ◍ · 8:12</span></div><div class="amt" style="color:var(--green)">+$120.00</div></div>
+      <div class="li"><div class="ic bot">✦</div><div class="t"><b>Shopper paid Wellcome</b><span>groceries · 7:40</span></div><div class="amt">−$48.90</div></div>
+    </div>
+    <div class="tabs">
+      <div class="tab on"><div class="ic"></div>Home</div>
+      <div class="tab"><div class="ic"></div>Agents</div>
+      <div class="tab"><div class="ic"></div>Activity</div>
+      <div class="tab"><div class="ic"></div>You</div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. APPROVAL -->
+<div class="frame">
+  <p class="label">3 · Agent asks permission</p>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>●●● ▲</span></div>
+    <div class="screen">
+      <div class="h"><div><h2>Agents</h2><div class="sub">2 active · 1 waiting on you</div></div></div>
+      <div class="card"><div class="li" style="padding:0"><div class="ic bot">✦</div><div class="t"><b>Shopper</b><span>Claude · live</span></div><div class="toggle"></div></div></div>
+      <div class="card"><div class="li" style="padding:0"><div class="ic bot">✦</div><div class="t"><b>Saver</b><span>GPT · paused</span></div><div class="toggle off"></div></div></div>
+    </div>
+    <div class="dim"></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="pill warn" style="display:inline-block;margin-bottom:12px">Needs your okay</div>
+      <div class="ask"><em>Shopper</em> wants to send <em>$220.00</em> to Apple Store</div>
+      <p class="plain">This is over its usual $80 and goes to a new place. Nothing moves until you say so.</p>
+      <div class="check"><i>✓</i> Apple Store is a verified business ◍</div>
+      <div class="check"><i>✓</i> Within this week's $500 limit</div>
+      <div class="check"><i class="x">!</i> First time paying this merchant</div>
+      <div class="actions" style="margin-top:18px"><a class="btn ghost">Decline</a><a class="btn ok">Approve</a></div>
+      <div style="text-align:center;font-size:13px;color:var(--ink-3);margin-top:10px">Expires in 14 min · ask Shopper why</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. AGENT DETAIL -->
+<div class="frame">
+  <p class="label">4 · One agent, in plain words</p>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>●●● ▲</span></div>
+    <div class="screen">
+      <div class="h"><div><div class="sub">‹ Agents</div><h2>Shopper <span class="pill live">live</span></h2></div><div class="ic bot" style="width:48px;height:48px;border-radius:16px;font-size:22px">✦</div></div>
+      <div class="card tint">
+        <div class="eyebrow">Spent this week</div>
+        <div class="big" style="font-size:32px">$212.60 <span style="font-size:15px;color:var(--ink-2);font-weight:500">of $500</span></div>
+        <div class="bar"><i style="width:42%"></i></div>
+      </div>
+      <div class="card" style="padding:4px 18px">
+        <div class="kv"><span>Runs on</span><b>Claude · via MCP</b></div>
+        <div class="kv"><span>Can pay without asking</span><b>up to $80</b></div>
+        <div class="kv"><span>Can pay</span><b>5 saved places</b></div>
+        <div class="kv"><span>Can never</span><b>withdraw to cash, add places</b></div>
+        <div class="kv"><span>Verified</span><b>◍ by you · 12 Oct</b></div>
+      </div>
+      <div class="actions"><a class="btn">Pause</a><a class="btn">Change limits</a><a class="btn ghost" style="color:var(--red)">Remove</a></div>
+      <div class="sec">Recent</div>
+      <div class="li"><div class="ic">🛒</div><div class="t"><b>Wellcome</b><span>Today · auto-approved</span></div><div class="amt">−$48.90</div></div>
+      <div class="li"><div class="ic">🛒</div><div class="t"><b>PARKnSHOP</b><span>Mon · auto-approved</span></div><div class="amt">−$63.70</div></div>
+      <div class="li"><div class="ic warn">!</div><div class="t"><b>Apple Store</b><span>Waiting for you</span></div><div class="amt">$220.00</div></div>
+    </div>
+    <div class="tabs">
+      <div class="tab"><div class="ic"></div>Home</div>
+      <div class="tab on"><div class="ic"></div>Agents</div>
+      <div class="tab"><div class="ic"></div>Activity</div>
+      <div class="tab"><div class="ic"></div>You</div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. CONNECT -->
+<div class="frame">
+  <p class="label">5 · Connect an AI (MCP)</p>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>●●● ▲</span></div>
+    <div class="screen">
+      <div class="h"><div><div class="sub">‹ Back</div><h2>Add a helper</h2></div></div>
+      <p class="plain" style="margin-top:0">Pick where your AI lives. We'll give it its own wallet, its own verified mark, and only the powers you choose.</p>
+      <div class="logo"><div class="sq" style="background:#d97757"></div>Claude <span class="pill ok" style="margin-left:auto">Recommended</span></div>
+      <div class="logo"><div class="sq" style="background:#10a37f"></div>ChatGPT</div>
+      <div class="logo"><div class="sq" style="background:#4285f4"></div>Gemini</div>
+      <div class="logo"><div class="sq" style="background:var(--ink-3)"></div>Something else (MCP link)</div>
+      <div class="sec">Step 2 · paste this where your AI keeps its tools</div>
+      <div class="code">{ "mcpServers": { "sigil": { "url": "https://sigil.money/mcp", "key": "sk-live-•••• 8f2a" } } }</div>
+      <div class="sec">Step 3 · starting powers</div>
+      <div class="card" style="padding:4px 18px">
+        <div class="kv"><span>Look at balances</span><div class="toggle"></div></div>
+        <div class="kv"><span>Pay saved places up to $80</span><div class="toggle"></div></div>
+        <div class="kv"><span>Pay anyone</span><div class="toggle off"></div></div>
+        <div class="kv"><span>Withdraw</span><div class="toggle off"></div></div>
+      </div>
+      <a class="wide" style="margin-top:8px">Create helper wallet</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="notes">
+  <p><b>Direction in one line:</b> paper white, near-black ink, one accent blue reserved for the verified mark and the agent's name. Green and amber only mean "safe" and "needs you". Numbers are big and tabular; everything else is quiet.</p>
+  <p style="margin-top:12px"><b>Open questions for you:</b> the verified symbol (◍ is a placeholder), whether agents are called helpers or agents in the UI, and whether the home screen leads with total money or with "what's waiting on you".</p>
+</div>
+</body>
+</html>
