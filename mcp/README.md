@@ -17,7 +17,7 @@ Claude Desktop → Settings → Developer → Edit Config, then add:
   "mcpServers": {
     "sigil": {
       "command": "node",
-      "args": ["/ABSOLUTE/PATH/TO/ai-pay-gate/mcp/index.mjs"],
+      "args": ["/ABSOLUTE/PATH/TO/sigil/mcp/index.mjs"],
       "env": {
         "API_BASE": "https://<backend url>/api/v1",
         "AGENT_TOKEN": "<agent token from Frank>"

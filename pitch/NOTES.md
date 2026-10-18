@@ -31,6 +31,6 @@ Read this first if you pick up the deck or the video. The backend/merge line has
 - Security note from the automated review (owner token in the `/events` query string) was fixed by the merge session at 05:15 (single-use ticket).
 
 ## Devpost checklist (rules verified on hackharvard2026.devpost.com)
-- Submit by 8:00 AM EDT. Public GitHub repo created 10/16–18 (ai-pay-gate is public). Tick every track and sponsor prize: at least Overall + Digital Trust; Chalk or Nessie only if actually used.
+- Submit by 8:00 AM EDT. Public GitHub repo created 10/16–18 (franktsai2008-eng/sigil is public). Tick every track and sponsor prize: at least Overall + Digital Trust; Chalk or Nessie only if actually used.
 - Video optional, max 3 minutes, on YouTube or similar.
 - Judging 9:00–12:00 at the table: 3-minute presentation + questions. Closing ceremony 3:00–4:00 PM.

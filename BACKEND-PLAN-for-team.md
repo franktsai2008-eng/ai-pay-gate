@@ -46,7 +46,7 @@ Owner web app (Next.js, frontend team) ──HTTP, polling──> Backend API (N
 
 - One backend service. All state in memory, saved to a JSON snapshot. `POST /api/v1/admin/reset` restores the demo seed.
 - Live updates: **poll** `GET /api/v1/owner/feed?since=<cursor>` every 2 seconds. No websockets.
-- Code: private repo `github.com/franktsai2008-eng/ai-pay-gate` (ask Frank for access). Run the backend yourself: `cd backend && npm install && npm run dev` → `http://localhost:8787/api/v1/health`. Tests: `npm test`.
+- Code: public repo `github.com/franktsai2008-eng/sigil`. Run the backend yourself: `cd backend && npm install && npm run dev` → `http://localhost:8787/api/v1/health`. Tests: `npm test`.
 - Backend URL: local `http://localhost:8787` while building. A cloud URL comes once Frank approves the deploy. Put the base URL in one env var (`NEXT_PUBLIC_API_BASE`).
 
 ## 4. Conventions
