@@ -718,6 +718,15 @@ export function recomputeAll() {
   const seenPairs = new Map<string, number>();
   const changedTrades: { tradeId: string; sellerAgentId: string; pointsBefore: number; pointsAfter: number; why: string }[] = [];
   const t = now();
+  // Roll "last week's score" forward every 7 days, so the +10-a-week cap moves with the seller instead of sticking to the seeded value.
+  for (const a of sellers) {
+    const sl = a.seller!;
+    if (sl.scoreWeekAgoAt === undefined) sl.scoreWeekAgoAt = t;
+    else if (t - sl.scoreWeekAgoAt >= 7 * DAY) {
+      sl.scoreWeekAgo = round(scoreBefore.get(a.id) ?? sl.scoreWeekAgo, 2);
+      sl.scoreWeekAgoAt = t;
+    }
+  }
   for (const tr of [...state.trades].sort((a, b) => a.at - b.at)) {
     const buyer = state.agents[tr.buyerAgentId];
     const seller = state.agents[tr.sellerAgentId];

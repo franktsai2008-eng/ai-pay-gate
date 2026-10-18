@@ -55,6 +55,8 @@ export interface SellerProfile {
   baselineTrades: number;
   baselineDistinctBuyers: number;
   scoreWeekAgo: number;
+  /** when scoreWeekAgo was last rolled forward; the nightly recompute rolls it every 7 days */
+  scoreWeekAgoAt?: number;
   depositMicro: number;
   scripted: "feed" | "report" | "scam" | "generic";
 }
