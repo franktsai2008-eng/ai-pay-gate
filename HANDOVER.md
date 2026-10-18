@@ -51,7 +51,7 @@ All of it is in `contract/openapi.yaml`. In order of what unblocks the UI:
 |---|---|---|
 | 1 | `GET /me`, `GET /wallets`, `GET /parties`, `GET /agents` | Home, Helpers, sidebar render with real data |
 | 2 | `GET /transactions`, `POST /transactions` | Activity, Send |
-| 3 | Policy engine + `POST /transactions/{id}/approve|decline` | Waiting on you |
+| 3 | Policy engine + `POST /transactions/{id}/approve, decline` | Waiting on you |
 | 4 | `GET /events` (SSE) | Live updates, the phone buzzing while a helper waits |
 | 5 | `POST /agents`, `PATCH /agents/{id}/policy`, pause/resume, delete | New helper, limits, remove |
 | 6 | `POST /me/verification` | Sealing the user |
