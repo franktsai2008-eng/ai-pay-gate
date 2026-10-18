@@ -1,4 +1,31 @@
-# HANDOFF — AI 付款安全閘門（2026-10-18 凌晨）
+# HANDOFF — AI 付款安全閘門（2026-10-18 01:45 更新）
+
+## 給新 session：先讀這段
+
+**期限：HackHarvard Devpost 今天（10/18）早上 8:00 ET 交件。** Frank 一次回答了 25 題（SPEC.md 第十四章）：分工是 Claude 寫後端、隊友寫前端和 Claude 連接（MCP）；全部模擬、不上鏈；比賽作品。
+
+**後端 v0 已經寫好、測過、推上去了。** repo：https://github.com/franktsai2008-eng/ai-pay-gate （私有，main 分支，後端在 `backend/`）。
+- 跑：`cd backend && npm install && npm run dev` → http://localhost:8787/api/v1/health
+- 測：`npm test`（4 組，全過：三燈示範、AI 不能自己同意、按兩下只付一次、暫停、分數 82 等級 3）
+- 型別：`npx tsc --noEmit`
+- API 合約＝`BACKEND-PLAN-for-team.md`（英文，給隊友）。改 API 一定同步改這份。
+- 產品真相＝`SPEC.md`（中文）。
+
+**程式結構**：`src/types.ts` 型別；`src/store.ts` 記憶體狀態＋JSON 快照（DATA_DIR）＋事件；`src/seed.ts` 示範資料（Mia、3 個賣家、騙子繞圈、20 筆舊交易）；`src/engine.ts` 閘門六道檢查＋燈號、執行（同步，不能加 await，靠單執行緒保證原子性）、同意、暫停、訂單、示範賣家交貨、驗收流程、信用公式、每秒 tick；`src/judge.ts` Claude 驗收（claude-opus-5-5、effort low、messages.parse＋zodOutputFormat；這代模型不能強制 tool_choice）；`src/routes.ts` 所有 API；`src/server.ts` 啟動。
+
+**環境變數（部署時要設）**：ADMIN_KEY、DEMO_PASSCODE（登入用）、OWNER_TOKEN、AGENT_TOKEN（覆蓋文件裡公開的預設值）、ANTHROPIC_API_KEY（Frank 的；沒設就只做格式檢查）、PORT、DATA_DIR。
+
+**接下來（照順序）**
+1. 部署：等 Frank 選（筆電＋cloudflared 臨時網址／Railway 要他 `railway login`／Render 免費會睡）。部署是硬閘門，他說了才做。部署後把網址、示範密碼給 Frank 轉隊友。
+2. 備案「會上當的 AI」（15A）：`backend/scripts/naive-agent.ts`，用 claude-haiku-5-5 加一組呼叫 /agent/* 的工具；它不上當就改成寫死的腳本（先找商品、再付給騙子說明裡的地址）。
+3. 隊友整合時的修正：只改後端，API 形狀以 BACKEND-PLAN-for-team.md 為準。
+4. 隊友的 MCP 來不及的話，Claude 可以寫（約 20 分鐘），但要 Frank 說。
+5. 上台前：`POST /api/v1/admin/reset`；確認三步燈號；錄備用影片。
+
+**合併**：隊友的前端另外做，之後再 merge。建議前端放 `frontend/` 或另一個分支，後端留在 `backend/`，兩邊不改同一個資料夾就不會衝突。
+
+---
+
 
 ## 現在在哪
 還沒寫任何程式。Frank 指示：「先不要寫後端，等我確認改好再來做」。目前全部是設計和邏輯，用三個 artifact 呈現，給 Frank 確認。
