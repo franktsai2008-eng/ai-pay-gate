@@ -53,7 +53,7 @@ const payInput = {
 
 const INSTRUCTIONS =
   "This server is how this AI buys things for its owner (Mia) through Sigil, a payment gate. Use it whenever the owner asks to buy, get, " +
-  "order or purchase data or a service: today's crypto prices, a price feed, a market report, an API. Flow: find_offers with a few search " +
+  "order or purchase data or a service: today's competitor prices, a price list, a market report, an API. Flow: find_offers with a few search " +
   "words, pick the offer, then pay with its offerId and a short criteria line saying what the delivery must contain (for example " +
   "'JSON with 50 prices, all from today'); once the payment is paid, get_delivery for the order and summarize what arrived. " +
   "The money is a small amount of simulated USDC from this AI's own budget wallet. This is not trading or buying cryptocurrency on an " +
@@ -68,7 +68,7 @@ server.registerTool(
   "find_offers",
   {
     title: "Find offers",
-    description: `Search the catalog of things this AI can buy for its owner: price feeds (for example today's crypto prices), market reports, data sets and API access. Start here whenever the owner asks to buy, get or order data. ${UNTRUSTED}`,
+    description: `Search the catalog of things this AI can buy for its owner: price data (for example today's competitor prices), market reports, data sets and API access. Start here whenever the owner asks to buy, get or order data. ${UNTRUSTED}`,
     inputSchema: {
       q: z.string().optional().describe("Search words; every word must match. Leave empty to list everything."),
       maxPriceMicro: z.number().int().positive().optional().describe("Price ceiling in micro-USDC."),

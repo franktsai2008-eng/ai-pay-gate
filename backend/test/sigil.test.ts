@@ -103,7 +103,7 @@ test("sigil: green, yellow, red payments appear as settled, pending_approval, de
   assert.equal(green.toPartyId, "agt_feed");
   assert.equal(green.amount.amount, "0.05");
   assert.equal(green.fiatAmount.currency, "USD");
-  assert.equal(green.memo, "Today's crypto prices (50 coins)");
+  assert.equal(green.memo, "Today's competitor prices (50 products)");
   assert.equal(green.reason, "daily prices");
   assert.deepEqual(green.flags, []);
   assert.ok(green.settledAt);

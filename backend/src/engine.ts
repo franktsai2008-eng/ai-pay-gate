@@ -533,8 +533,8 @@ function createOrder(p: Payment) {
 }
 
 function defaultCriteria(l: Listing): string {
-  if (l.deliveryKind === "prices") return "JSON with 50 coin prices, all dated today.";
-  if (l.deliveryKind === "report") return "A written market report covering BTC, ETH and SOL.";
+  if (l.deliveryKind === "prices") return "JSON with 50 product prices, all dated today.";
+  if (l.deliveryKind === "report") return "A written market report covering demand, pricing and rival shops.";
   return "Matches the listing.";
 }
 
@@ -547,27 +547,33 @@ function scriptedDelivery(o: Order): string {
   const seller = getAgent(o.sellerAgentId);
   const kind = seller.seller?.scripted;
   if (kind === "feed") {
-    const coins = ["BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "DOGE", "AVAX", "DOT", "LINK", "MATIC", "TON", "TRX", "LTC", "BCH", "NEAR", "UNI", "ATOM", "XLM", "ICP", "APT", "ARB", "OP", "FIL", "HBAR", "VET", "INJ", "SUI", "SEI", "TIA", "RNDR", "IMX", "STX", "AAVE", "MKR", "GRT", "ALGO", "EGLD", "SAND", "MANA", "AXS", "FTM", "THETA", "FLOW", "CHZ", "KAS", "XMR", "ETC", "QNT", "RUNE"];
-    // plausible magnitudes for every coin, so the delivery reads like a real feed (a buyer's AI checks these)
-    const base: Record<string, number> = {
-      BTC: 81736, ETH: 3412, SOL: 158.4, BNB: 592, XRP: 2.41, ADA: 0.67, DOGE: 0.19, AVAX: 29.8, DOT: 5.9, LINK: 17.6,
-      MATIC: 0.42, TON: 5.3, TRX: 0.21, LTC: 94.2, BCH: 412, NEAR: 4.6, UNI: 8.9, ATOM: 6.4, XLM: 0.31, ICP: 8.1,
-      APT: 7.9, ARB: 0.71, OP: 1.42, FIL: 4.3, HBAR: 0.18, VET: 0.034, INJ: 18.4, SUI: 2.9, SEI: 0.36, TIA: 4.8,
-      RNDR: 6.2, IMX: 1.35, STX: 1.6, AAVE: 215, MKR: 1480, GRT: 0.17, ALGO: 0.24, EGLD: 28.5, SAND: 0.38, MANA: 0.41,
-      AXS: 5.1, FTM: 0.72, THETA: 1.3, FLOW: 0.62, CHZ: 0.081, KAS: 0.12, XMR: 168, ETC: 21.4, QNT: 92, RUNE: 3.7,
-    };
+    // competitor prices for 50 home and kitchen best sellers, with plausible prices (a buyer's AI checks these)
+    const products: [string, number][] = [
+      ["Ceramic mug, 12 oz", 14.5], ["Glass water bottle, 500 ml", 18], ["Bamboo cutting board", 24], ["Linen tea towels, set of 2", 16],
+      ["Cotton tote bag", 12], ["Soy candle, 8 oz", 22], ["Stoneware bowl", 19], ["Steel straw set", 9.5], ["Beeswax food wraps, 3 pack", 15],
+      ["Cast iron skillet, 10 in", 38], ["Pour-over coffee dripper", 27], ["French press, 1 L", 34], ["Loose-leaf tea tin", 11],
+      ["Wooden spoon set", 17], ["Olive wood serving board", 42], ["Enamel camping mug", 13], ["Wool throw blanket", 68],
+      ["Linen pillow cover", 26], ["Ceramic planter, 6 in", 21], ["Macrame plant hanger", 18.5], ["Reed diffuser", 29],
+      ["Cotton bath towel", 32], ["Hand-poured soap bar", 8], ["Bamboo toothbrushes, 4 pack", 10], ["Glass storage jar, 1 L", 14],
+      ["Silicone baking mat", 16], ["Wire fruit basket", 23], ["Marble coaster set", 28], ["Copper measuring cups", 31],
+      ["Salt and pepper mill set", 36], ["Rattan storage basket", 39], ["Recycled glass vase", 25], ["Desk organizer tray", 20],
+      ["Linen napkins, set of 4", 24], ["Cork placemats, set of 4", 22], ["Stoneware teapot", 44], ["Insulated lunch box", 27],
+      ["Kitchen apron", 26], ["Herb keeper", 19], ["Wall clock, 12 in", 48], ["Linen lamp shade", 35], ["Picture frame, 8x10", 17],
+      ["Dotted notebook, A5", 12], ["Wooden coat hook", 15], ["Coir doormat", 29], ["Cotton shower curtain", 38],
+      ["Cotton bath mat", 24], ["Laundry hamper", 46], ["Silicone ice cube tray", 9], ["Pantry label set", 11],
+    ];
     return JSON.stringify({
       date: today(),
-      prices: coins.map((c, i) => ({ coin: c, usd: base[c] ?? Math.round((0.1 + ((i * 37) % 97) * 1.7) * 100) / 100, date: today() })),
+      prices: products.map(([product, usd]) => ({ product, usd, date: today() })),
     });
   }
   if (kind === "report") {
     return [
       `Weekly market report, week of ${today()}.`,
-      "BTC: spot ETF inflows slowed midweek; funding rates stayed neutral, so the move was spot-driven rather than leverage-driven.",
-      "ETH: staking share kept rising; the ETH/BTC ratio held its range. Watch the upcoming upgrade timeline.",
-      "SOL: on-chain volume led majors for the third week; fees rose with memecoin activity.",
-      "What to watch next week: macro data on Wednesday, options expiry on Friday, and stablecoin supply growth.",
+      "Demand: searches for home and kitchen goods rose 6% week over week; mugs, candles and storage jars led, and gift sets started climbing early.",
+      "Pricing: the median listing price in the category held flat; three large sellers cut cookware prices by about 10%.",
+      "Rival shops: two new shops opened with free shipping over $35; one top seller ran low on stoneware and paused its ads.",
+      "What to watch next week: the holiday gift-guide push, higher shipping rates on bulky items, and restock timing for best sellers.",
     ].join("\n");
   }
   if (kind === "scam") {
@@ -605,7 +611,7 @@ function codeCheck(o: Order): { passed: boolean; notes: string[] } {
     }
   } else if (listing.deliveryKind === "report") {
     if (content.length < 200) notes.push("Report is too short.");
-    for (const coin of ["BTC", "ETH", "SOL"]) if (!content.includes(coin)) notes.push(`Report doesn't cover ${coin}.`);
+    for (const topic of ["Demand", "Pricing", "Rival shops"]) if (!content.includes(topic)) notes.push(`Report doesn't cover ${topic.toLowerCase()}.`);
   }
   return { passed: notes.length === 0, notes };
 }
