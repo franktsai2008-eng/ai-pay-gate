@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sigil · v5 · with the mark</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--char:#1f2321;--char2:#2a2f2c;--paper:#f7f6f2;--paper2:#efeee9;--card:#fff;--ink:#1b1e1c;--ink2:#5f6561;--ink3:#9a9f9b;--line:#e6e5df;--sage:#2f5d4a;--sage-soft:#e3ece6;--clay:#8a5a4a;--clay-soft:#f3e9e4;--red:#a8382b;--pale:#c9cdc8;--serif:"Newsreader",Georgia,serif;--sans:"Inter",-apple-system,system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:#e9e7e1;padding:40px;font-size:14px;-webkit-font-smoothing:antialiased}
+.serif{font-family:var(--serif);font-weight:400;letter-spacing:-.015em}
+.num{font-variant-numeric:tabular-nums}
+h1{font-family:var(--serif);font-weight:400;font-size:40px;letter-spacing:-.02em}
+.lead{color:var(--ink2);max-width:760px;margin-top:8px;font-size:15px;line-height:1.5}
+.board{display:flex;gap:28px;margin-top:34px;align-items:flex-start;flex-wrap:wrap}
+.phone{width:390px;height:844px;background:var(--paper);border-radius:46px;border:10px solid #15181a;position:relative;overflow:hidden;flex:none;box-shadow:0 30px 80px -30px rgba(0,0,0,.45)}
+.phone .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:30px;background:#15181a;border-radius:0 0 18px 18px;z-index:5}
+.scr{position:absolute;inset:0;padding:58px 20px 0;overflow:hidden}
+.cap{width:390px;margin-top:12px;color:var(--ink2);font-size:13px;line-height:1.5}
+.cap b{color:var(--ink);font-weight:600;display:block;margin-bottom:2px}
+.col{flex:none}
+.tab{position:absolute;left:0;right:0;bottom:0;height:84px;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:12px}
+.tab span{font-size:11px;color:var(--ink3);font-weight:500;display:flex;flex-direction:column;align-items:center;gap:5px}
+.tab span i{width:24px;height:24px;border-radius:7px;border:2px solid currentColor;display:block;opacity:.9}
+.tab span.on{color:var(--ink)}
+.tab span.on i{background:var(--ink);border-color:var(--ink)}
+.seal{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:4px;background:var(--char);color:#fff;font-family:var(--serif);font-size:11px;vertical-align:middle}
+.seal.a{background:var(--sage)}
+.seal.lg{width:44px;height:44px;border-radius:12px;font-size:26px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--paper2);color:var(--ink2)}
+.pill.sage{background:var(--sage-soft);color:var(--sage)}
+.pill.clay{background:var(--clay-soft);color:var(--clay)}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.hero{margin-top:6px}
+.hero .lbl{color:var(--ink2);font-size:13px}
+.hero .big{font-family:var(--serif);font-size:46px;letter-spacing:-.025em;line-height:1.05;margin-top:2px}
+.hero .chg{color:var(--sage);font-weight:500;margin-top:6px;font-size:14px}
+.chart{height:150px;margin:14px -20px 0;position:relative}
+.chart svg{width:100%;height:100%;display:block}
+.ranges{display:flex;gap:4px;margin:8px 0 0;justify-content:space-between;padding:0 4px}
+.ranges span{font-size:12px;font-weight:600;color:var(--ink3);padding:6px 10px;border-radius:8px}
+.ranges span.on{color:var(--sage);background:var(--sage-soft)}
+.btns{display:flex;gap:10px;margin-top:16px}
+.btn{flex:1;text-align:center;padding:14px;border-radius:14px;font-weight:600;font-size:15px;border:1px solid var(--line);background:#fff}
+.btn.p{background:var(--char);color:#fff;border-color:var(--char)}
+.btn.s{background:var(--sage);color:#fff;border-color:var(--sage)}
+.sec{font-size:13px;color:var(--ink2);font-weight:500;margin:22px 0 8px;display:flex;justify-content:space-between}
+.sec a{color:var(--sage)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.ic{width:40px;height:40px;border-radius:12px;background:var(--paper2);display:flex;align-items:center;justify-content:center;flex:none}
+.ic.a{background:var(--sage-soft)}
+.ic.w{background:var(--clay-soft)}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-weight:500;font-size:15px}
+.row .t span{display:block;color:var(--ink2);font-size:12.5px;margin-top:1px}
+.row .amt{text-align:right;font-weight:500;font-size:15px}
+.row .amt small{display:block;color:var(--ink3);font-weight:400;font-size:12px}
+.spark{width:64px;height:26px;flex:none}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px}
+.notice{background:var(--clay-soft);border-radius:16px;padding:14px 16px;display:flex;gap:12px;align-items:center;margin-top:16px}
+.notice b{font-weight:500}
+.notice .go{margin-left:auto;color:var(--clay);font-weight:600;white-space:nowrap}
+.pin{position:absolute;left:20px;right:20px;bottom:30px}
+.pin .btn{display:block;width:100%;padding:17px;font-size:16px;border-radius:16px}
+.swipe{position:relative;height:60px;border-radius:30px;background:var(--sage-soft);display:flex;align-items:center;justify-content:center;color:var(--sage);font-weight:600;font-size:15px;overflow:hidden}
+.swipe .knob{position:absolute;left:5px;top:5px;width:50px;height:50px;border-radius:50%;background:var(--sage);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
+.ask{font-family:var(--serif);font-size:28px;line-height:1.15;letter-spacing:-.015em;margin-top:14px}
+.ask em{font-style:normal;color:var(--sage)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;font-size:14px;color:var(--ink)}
+.check i{width:20px;height:20px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;color:#fff;background:var(--sage);margin-top:1px}
+.check i.c{background:var(--clay)}
+.why{background:var(--paper2);border-radius:14px;padding:12px 14px;font-size:13.5px;color:var(--ink2);font-style:italic;margin-top:8px;line-height:1.45}
+.cards{display:flex;gap:12px;margin:10px -20px 0;padding:0 20px;overflow:hidden}
+.disc{flex:none;width:200px;border-radius:18px;padding:16px;background:var(--char);color:#fff;min-height:120px;display:flex;flex-direction:column;justify-content:flex-end}
+.disc.l{background:var(--sage)}
+.disc.c{background:var(--clay)}
+.disc b{font-family:var(--serif);font-weight:400;font-size:18px;line-height:1.15;display:block}
+.disc span{opacity:.7;font-size:12px;margin-top:6px;display:block}
+.celebrate{position:absolute;inset:0;background:var(--sage);color:#fff;padding:58px 28px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.celebrate .seal.lg{background:#fff;color:var(--sage);width:72px;height:72px;font-size:42px;border-radius:20px}
+.celebrate h2{font-family:var(--serif);font-weight:400;font-size:34px;letter-spacing:-.02em;margin-top:26px;line-height:1.1}
+.celebrate p{opacity:.8;margin-top:12px;line-height:1.5}
+.confetti i{position:absolute;width:8px;height:14px;border-radius:2px;opacity:.9}
+.keys{display:flex;flex-direction:column;gap:12px;margin-top:40px;color:#fff;align-items:center}
+.keys .w{font-family:var(--serif);font-size:24px}
+.keyrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:40px}
+.keyrow .btn{flex:none;width:170px;background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+.keyrow .btn.p{background:#fff;color:var(--sage);border-color:#fff}
+.amt-big{text-align:center;margin-top:36px}
+.amt-big .v{font-family:var(--serif);font-size:72px;letter-spacing:-.03em;line-height:1}
+.amt-big .v small{font-size:36px;color:var(--ink3);vertical-align:top;margin-right:4px}
+.amt-big .sub{color:var(--ink2);margin-top:8px}
+.quick{display:flex;gap:8px;justify-content:center;margin-top:18px}
+.quick span{padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:600;font-size:13px}
+.quick span.on{background:var(--char);color:#fff;border-color:var(--char)}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.topbar .w{font-family:var(--serif);font-size:24px}
+.topbar .av{display:flex;gap:8px;align-items:center}
+.topbar .av span{width:30px;height:30px;border-radius:9px;background:var(--paper2);display:flex;align-items:center;justify-content:center}
+.topbar .av span.seal{background:var(--char);color:#fff;font-size:16px}
+.notes{width:390px;flex:none}
+.notes .card{padding:20px 22px}
+.notes h3{font-family:var(--serif);font-weight:400;font-size:22px;margin-bottom:12px}
+.notes ul{list-style:none}
+.notes li{padding:9px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;font-size:13.5px;line-height:1.4}
+.notes li:last-child{border:0}
+.notes li i{font-style:normal;flex:none;width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.notes li i.rh{background:#1d9a5b}
+.notes li i.hv{background:var(--char)}
+.notes li i.sg{background:var(--sage)}
+
+.mk{display:inline-block;vertical-align:middle;overflow:visible;flex:none}
+.shelf{display:flex;gap:26px;align-items:flex-start;margin-top:30px;background:linear-gradient(160deg,#3a4a44,#1c2220);border-radius:28px;padding:26px 30px 18px;width:fit-content}
+.shelf .app{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:11px;color:#fff;width:64px}
+.shelf .ph{width:64px;height:64px;border-radius:15px;background:#d9d6cf}
+.shelf .ph.n{background:#2b2d33}.shelf .ph.r{background:#2ea043}.shelf .ph.w{background:#f2f2f2}.shelf .ph.m{background:#1e7cf5}
+.splash{position:absolute;inset:0;background:var(--char);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px}
+.splash h2{font-family:var(--serif);font-weight:400;font-size:44px;letter-spacing:-.02em;margin-top:30px}
+.splash p{opacity:.7;margin-top:12px;line-height:1.5;font-size:15px;max-width:290px}
+.splash .pin .btn{background:#fff;color:var(--char);border-color:#fff}
+.splash .pin .lnk{text-align:center;opacity:.7;margin-top:14px;font-weight:500}
+.stamp{animation:stamp 2.6s ease-in-out infinite;transform-origin:50% 50%}
+@keyframes stamp{0%,60%{transform:scale(1);opacity:1}66%{transform:scale(1.25);opacity:0}80%,100%{transform:scale(1);opacity:1}}
+.sealed{position:absolute;inset:0;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px}
+.sealed .big2{font-family:var(--serif);font-size:34px;line-height:1.1;letter-spacing:-.02em;margin-top:28px}
+.sealed .big2 em{font-style:normal;color:var(--sage)}
+.sealed p{color:var(--ink2);margin-top:12px;line-height:1.5}
+.ring{position:absolute;width:160px;height:160px;border-radius:50%;border:1px solid var(--sage);opacity:0;animation:ring 2.6s ease-out infinite}
+@keyframes ring{0%,76%{transform:scale(.6);opacity:0}84%{opacity:.5}100%{transform:scale(1.6);opacity:0}}
+.ledger{display:flex;align-items:center;gap:8px;margin-top:26px;color:var(--ink2);font-size:12px}
+.ledger i{flex:1;height:1px;background:var(--line)}
+.tile-rail{display:flex;gap:10px;margin:12px -20px 0;padding:0 20px;overflow:hidden}
+.tile-rail .tt{flex:none;width:120px;height:120px;border-radius:22px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="sg-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b4642"/><stop offset="1" stop-color="#1a1e1c"/></linearGradient>
+  <radialGradient id="sg-inner" cx=".5" cy=".3" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="sg-glow" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2f5d4a"/><stop offset="1" stop-color="#8fc3a6"/></linearGradient>
+  <clipPath id="sg-half"><polygon points="0,0 100,0 100,28 0,70"/></clipPath>
+  <filter id="sg-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.4"/></filter>
+  <mask id="dissolve" maskUnits="userSpaceOnUse" x="-20" y="-20" width="140" height="140">
+  <polygon points="-20,-20 5.999999999999972,-20 120,94.00000000000003 120,120 -20,120" fill="#fff"/>
+  <rect x="24.9" y="-5.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="30.9" y="-5.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="37.1" y="-4.9" width="5.8" height="5.8" rx="1.7" fill="#fff"/>
+<rect x="43.5" y="-4.5" width="5.0" height="5.0" rx="1.5" fill="#fff"/>
+<rect x="49.5" y="-4.5" width="5.0" height="5.0" rx="1.5" fill="#fff"/>
+<rect x="30.9" y="0.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="37.0" y="0.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="43.0" y="0.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="49.5" y="1.5" width="5.0" height="5.0" rx="1.5" fill="#fff"/>
+<rect x="55.7" y="1.7" width="4.6" height="4.6" rx="1.4" fill="#fff"/>
+<rect x="67.7" y="1.7" width="4.6" height="4.6" rx="1.4" fill="#fff"/>
+<rect x="37.0" y="7.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="43.0" y="7.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="49.0" y="7.0" width="5.9" height="5.9" rx="1.8" fill="#fff"/>
+<rect x="61.7" y="7.7" width="4.6" height="4.6" rx="1.4" fill="#fff"/>
+<rect x="67.9" y="7.9" width="4.2" height="4.2" rx="1.3" fill="#fff"/>
+<rect x="80.1" y="8.1" width="3.8" height="3.8" rx="1.1" fill="#fff"/>
+<rect x="92.3" y="8.3" width="3.5" height="3.5" rx="1.0" fill="#fff"/>
+<rect x="37.0" y="12.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="49.0" y="12.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="61.2" y="13.2" width="5.5" height="5.5" rx="1.7" fill="#fff"/>
+<rect x="86.0" y="14.0" width="4.0" height="4.0" rx="1.2" fill="#fff"/>
+<rect x="49.0" y="18.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="55.0" y="18.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="61.0" y="18.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="67.6" y="19.6" width="4.9" height="4.9" rx="1.5" fill="#fff"/>
+<rect x="73.3" y="19.3" width="5.3" height="5.3" rx="1.6" fill="#fff"/>
+<rect x="79.7" y="19.7" width="4.6" height="4.6" rx="1.4" fill="#fff"/>
+<rect x="85.8" y="19.8" width="4.4" height="4.4" rx="1.3" fill="#fff"/>
+<rect x="92.1" y="20.1" width="3.9" height="3.9" rx="1.2" fill="#fff"/>
+<rect x="49.0" y="24.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="61.0" y="24.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="67.1" y="25.1" width="5.8" height="5.8" rx="1.7" fill="#fff"/>
+<rect x="79.4" y="25.4" width="5.3" height="5.3" rx="1.6" fill="#fff"/>
+<rect x="61.0" y="30.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="67.0" y="30.9" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="91.8" y="31.8" width="4.5" height="4.5" rx="1.3" fill="#fff"/>
+<rect x="98.0" y="32.0" width="4.0" height="4.0" rx="1.2" fill="#fff"/>
+<rect x="67.0" y="37.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="73.0" y="37.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="79.0" y="37.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="73.0" y="43.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="79.0" y="43.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="85.0" y="43.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="91.3" y="43.3" width="5.4" height="5.4" rx="1.6" fill="#fff"/>
+<rect x="97.6" y="43.6" width="4.9" height="4.9" rx="1.5" fill="#fff"/>
+<rect x="85.0" y="49.0" width="6.0" height="6.0" rx="1.8" fill="#fff"/>
+<rect x="91.0" y="49.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="97.1" y="49.1" width="5.8" height="5.8" rx="1.7" fill="#fff"/>
+<rect x="85.0" y="55.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="91.0" y="55.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="97.2" y="55.2" width="5.6" height="5.6" rx="1.7" fill="#fff"/>
+<rect x="91.0" y="61.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="97.0" y="61.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+<rect x="97.0" y="67.0" width="6.1" height="6.1" rx="1.8" fill="#fff"/>
+</mask>
+</defs>
+<symbol id="sigil-mark" viewBox="-16 -16 132 132" overflow="visible"><g mask="url(#dissolve)">
+  <rect width="100" height="100" rx="22" fill="url(#sg-glass)"/>
+  <rect width="100" height="100" rx="22" fill="url(#sg-inner)"/>
+  <ellipse cx="48" cy="62" rx="30" ry="22" fill="#4f8a6f" opacity=".30" filter="url(#sg-soft)"/>
+  <rect x=".5" y=".5" width="99" height="99" rx="21.5" fill="none" stroke="#fff" stroke-opacity=".16"/>
+</g>
+<g mask="url(#dissolve)" opacity=".55"><rect x="67.7" y="1.7" width="4.6" height="4.6" rx="1.4" fill="url(#sg-glow)"/>
+<rect x="67.9" y="7.9" width="4.2" height="4.2" rx="1.3" fill="url(#sg-glow)"/>
+<rect x="80.1" y="8.1" width="3.8" height="3.8" rx="1.1" fill="url(#sg-glow)"/>
+<rect x="92.3" y="8.3" width="3.5" height="3.5" rx="1.0" fill="url(#sg-glow)"/>
+<rect x="86.0" y="14.0" width="4.0" height="4.0" rx="1.2" fill="url(#sg-glow)"/>
+<rect x="79.7" y="19.7" width="4.6" height="4.6" rx="1.4" fill="url(#sg-glow)"/>
+<rect x="85.8" y="19.8" width="4.4" height="4.4" rx="1.3" fill="url(#sg-glow)"/>
+<rect x="92.1" y="20.1" width="3.9" height="3.9" rx="1.2" fill="url(#sg-glow)"/>
+<rect x="91.8" y="31.8" width="4.5" height="4.5" rx="1.3" fill="url(#sg-glow)"/>
+<rect x="98.0" y="32.0" width="4.0" height="4.0" rx="1.2" fill="url(#sg-glow)"/></g>
+<text x="48" y="74" text-anchor="middle" font-family="Newsreader,'Times New Roman',serif" font-size="68" fill="#f3f1ea">S</text>
+<g clip-path="url(#sg-half)"><text x="48" y="74" text-anchor="middle" font-family="Newsreader,'Times New Roman',serif" font-size="68" fill="#9cc4ad">S</text></g>
+<rect x="78.2" y="-14.2" width="1.5" height="1.5" rx="0.5" fill="url(#sg-glow)" opacity="0.24"/>
+<rect x="84.1" y="-13.5" width="2.2" height="2.2" rx="0.7" fill="url(#sg-glow)" opacity="0.24"/>
+<rect x="97.5" y="-7.0" width="2.8" height="2.8" rx="0.8" fill="url(#sg-glow)" opacity="0.18"/>
+<rect x="107.3" y="-1.8" width="1.4" height="1.4" rx="0.4" fill="url(#sg-glow)" opacity="0.18"/>
+<rect x="94.6" y="-7.7" width="1.9" height="1.9" rx="0.6" fill="url(#sg-glow)" opacity="0.18"/>
+<rect x="102.0" y="31.8" width="3.7" height="3.7" rx="1.1" fill="url(#sg-glow)" opacity="0.63"/></symbol></svg>
+<h1>Sigil v5 · the app, with its mark</h1>
+<p class="lead">Same screens as v4. What's new is one object: the seal tile with the dissolving edge, drawn as vector, used as the app icon, the welcome screen, the helper avatar and the "sealed" stamp after every approval.</p>
+
+<div class="shelf">
+  <div class="app"><div class="ph n"></div>Notion</div>
+  <div class="app"><div class="ph m"></div>Messages</div>
+  <div class="app"><svg class="mk" width="64" height="64"><use href="#sigil-mark"/></svg>Sigil</div>
+  <div class="app"><div class="ph r"></div>Robinhood</div>
+  <div class="app"><div class="ph w"></div>Wallet</div>
+</div>
+
+<div class="board">
+
+<!-- 0 · WELCOME -->
+<div class="col">
+<div class="phone"><div class="notch"></div>
+  <div class="splash">
+    <div class="stamp"><svg class="mk" width="140" height="140"><use href="#sigil-mark"/></svg></div>
+    <h2>Sigil</h2>
+    <p>Your money, your helpers, every move sealed.</p>
+    <div class="pin"><div class="btn">Get started</div><div class="lnk">I already have Sigil</div></div>
+  </div>
+</div>
+<div class="cap"><b>Welcome · the mark, full size</b>Charcoal glass tile, the S lit sage on one stroke, the top-right edge breaking into tiles that drift off. The physical seal from the renders, rebuilt as vector so it belongs on a phone.</div>
+</div>
+
+<!-- 1 · HOME -->
+<div class="col">
+<div class="phone"><div class="notch"></div><div class="scr">
+  <div class="topbar"><span class="w" style="display:flex;align-items:center;gap:8px"><svg class="mk" width="26" height="26"><use href="#sigil-mark"/></svg>Sigil</span><div class="av"><span>🔔</span><svg class="mk" width="30" height="30"><use href="#sigil-mark"/></svg></div></div>
+  <div class="hero">
+    <div class="lbl">Yours and your helpers'</div>
+    <div class="big num">$4,428<span style="font-size:30px;color:var(--ink3)">.40</span></div>
+    <div class="chg">▲ $36.80 (0.84%) today</div>
+  </div>
+  <div class="chart">
+    <svg viewBox="0 0 390 150" preserveAspectRatio="none">
+      <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2f5d4a" stop-opacity=".18"/><stop offset="1" stop-color="#2f5d4a" stop-opacity="0"/></linearGradient></defs>
+      <path d="M0 110 C40 100,60 118,90 96 S140 70,170 82 S220 60,250 52 S300 48,330 36 S370 28,390 22 L390 150 L0 150Z" fill="url(#g)"/>
+      <path d="M0 110 C40 100,60 118,90 96 S140 70,170 82 S220 60,250 52 S300 48,330 36 S370 28,390 22" fill="none" stroke="#2f5d4a" stroke-width="2.2"/>
+      <line x1="0" y1="112" x2="390" y2="112" stroke="#c9cdc8" stroke-dasharray="3 5"/>
+      <circle cx="250" cy="52" r="5" fill="#2f5d4a" stroke="#fff" stroke-width="2"/>
+      <line x1="250" y1="0" x2="250" y2="150" stroke="#2f5d4a" stroke-opacity=".3"/>
+      <text x="258" y="14" font-size="11" fill="#5f6561" font-family="Inter">Wed · $4,391.60</text>
+    </svg>
+  </div>
+  <div class="ranges"><span>1D</span><span class="on">1W</span><span>1M</span><span>3M</span><span>1Y</span><span>All</span></div>
+  <div class="btns"><div class="btn p">Send</div><div class="btn">Receive</div><div class="btn">Ask Sigil</div></div>
+  <div class="notice"><svg class="mk" width="26" height="26"><use href="#sigil-mark"/></svg><div><b>Shopper</b> wants to pay Apple Store <b class="num">$220</b></div><span class="go">Review →</span></div>
+  <div class="sec">Your helpers <a>See all</a></div>
+  <div class="row"><div class="ic a"><svg class="mk" width="28" height="28"><use href="#sigil-mark"/></svg></div><div class="t"><b>Shopper</b><span>Claude · $212 of $500 this week</span></div><svg class="spark" viewBox="0 0 64 26"><path d="M0 20 L10 18 L20 21 L30 12 L40 14 L50 8 L64 6" fill="none" stroke="#2f5d4a" stroke-width="1.8"/></svg><div class="amt num">$640<small>live</small></div></div>
+  <div class="row"><div class="ic"><span class="seal" style="background:var(--pale)">S</span></div><div class="t"><b>Saver</b><span>ChatGPT · paused</span></div><svg class="spark" viewBox="0 0 64 26"><path d="M0 14 L64 14" fill="none" stroke="#c9cdc8" stroke-width="1.8"/></svg><div class="amt num">$458<small>paused</small></div></div>
+  <div class="tab"><span class="on"><i></i>Home</span><span><i></i>Helpers</span><span><i></i>Waiting</span><span><i></i>Activity</span></div>
+</div></div>
+<div class="cap"><b>Home · the Robinhood hero</b>One number, one colour that says up or down, a chart you can drag a finger across. Range pills under it. Three actions, the first one dark.</div>
+</div>
+
+
+<!-- 2 · APPROVAL swipe -->
+<div class="col">
+<div class="phone"><div class="notch"></div><div class="scr">
+  <div class="topbar"><span style="color:var(--ink2)">✕</span><span class="pill clay"><span class="dot"></span>Needs your okay</span><span></span></div>
+  <div class="ask"><em>Shopper</em> wants to pay <em class="num">$220</em> to Apple Store <span class="seal">S</span></div>
+  <div style="margin-top:18px">
+    <div class="check"><i class="c">!</i>More than Shopper can spend alone ($80)</div>
+    <div class="check"><i class="c">!</i>First time paying this place</div>
+    <div class="check"><i>✓</i>Apple Store is sealed. We know who they are.</div>
+    <div class="check"><i>✓</i>Within this week's $500 allowance</div>
+  </div>
+  <div class="sec">Why Shopper wants this</div>
+  <div class="why">“You asked me to replace the broken charger cable. Apple's price was $220 for the official one; the third-party ones had poor reviews.”</div>
+  <div class="card" style="margin-top:18px;display:flex;justify-content:space-between"><span style="color:var(--ink2)">From Shopper's wallet</span><b class="num">$640 → $420</b></div>
+  <div class="pin">
+    <div class="swipe"><div class="knob">→</div>Swipe to approve</div>
+    <div style="text-align:center;color:var(--ink2);margin-top:12px;font-weight:500">Decline</div>
+    <div style="text-align:center;color:var(--ink3);margin-top:6px;font-size:12px">Expires in 14 min. Nothing moves if you do nothing.</div>
+  </div>
+</div></div>
+<div class="cap"><b>Approve · swipe to confirm</b>Robinhood's "swipe up to submit": a deliberate gesture instead of a button you can fat-finger. Decline is a quiet text link. The money line shows before → after.</div>
+</div>
+
+
+
+<!-- 3b · SEALED moment -->
+<div class="col">
+<div class="phone"><div class="notch"></div>
+  <div class="sealed">
+    <div class="ring"></div>
+    <div class="stamp"><svg class="mk" width="120" height="120"><use href="#sigil-mark"/></svg></div>
+    <div class="big2"><em>$220</em> to Apple Store, sealed.</div>
+    <p>Shopper's wallet is now $420. Apple Store has the receipt with your seal on it.</p>
+    <div class="ledger"><i></i>Shopper · you · Apple Store<i></i></div>
+    <div class="pin"><div class="btn p">Done</div><div style="text-align:center;color:var(--ink2);margin-top:12px;font-weight:500">See the receipt</div></div>
+  </div>
+</div>
+<div class="cap"><b>Sealed · the stamp lands</b>After every swipe-to-approve: the mark drops in, settles, a ring goes out. Two seconds, then Done. This is the moment the whole brand is built around, and the one mum will recognise.</div>
+</div>
+
+<!-- 4 · HELPER detail -->
+<div class="col">
+<div class="phone"><div class="notch"></div><div class="scr">
+  <div class="topbar"><span style="color:var(--ink2)">‹ Helpers</span><span class="pill sage"><span class="dot"></span>live</span><span></span></div>
+  <div class="hero" style="margin-top:14px">
+    <div style="display:flex;align-items:center;gap:12px"><svg class="mk" width="52" height="52"><use href="#sigil-mark"/></svg><div><div class="serif" style="font-size:30px;line-height:1">Shopper</div><div class="lbl" style="margin-top:4px">Claude · buys the weekly groceries</div></div></div>
+    <div class="lbl" style="margin-top:22px">Spent this week</div>
+    <div class="big num" style="font-size:40px">$212<span style="font-size:24px;color:var(--ink3)">.60</span> <span style="font-family:var(--sans);font-size:14px;color:var(--ink2)">of $500</span></div>
+  </div>
+  <div class="chart" style="height:110px">
+    <svg viewBox="0 0 390 110" preserveAspectRatio="none">
+      <path d="M0 100 L60 100 L60 72 L130 72 L130 60 L200 60 L200 44 L260 44 L260 40 L390 40" fill="none" stroke="#2f5d4a" stroke-width="2.2"/>
+      <line x1="0" y1="12" x2="390" y2="12" stroke="#8a5a4a" stroke-dasharray="3 5"/>
+      <text x="300" y="9" font-size="10" fill="#8a5a4a" font-family="Inter">allowance $500</text>
+    </svg>
+  </div>
+  <div class="ranges"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+  <div class="btns"><div class="btn">Pause</div><div class="btn">Change limits</div></div>
+  <div class="sec">Its rules</div>
+  <div class="card" style="padding:4px 16px">
+    <div class="row"><div class="t"><b style="font-size:14px">Pays alone up to</b></div><div class="amt num">$80</div></div>
+    <div class="row"><div class="t"><b style="font-size:14px">Can pay</b></div><div class="amt" style="font-weight:400;color:var(--ink2)">Wellcome, PARKnSHOP</div></div>
+    <div class="row"><div class="t"><b style="font-size:14px">Never</b></div><div class="amt" style="font-weight:400;color:var(--ink2)">withdraws · adds places</div></div>
+  </div>
+  <div class="tab"><span><i></i>Home</span><span class="on"><i></i>Helpers</span><span><i></i>Waiting</span><span><i></i>Activity</span></div>
+</div></div>
+<div class="cap"><b>Helper · its own "stock page"</b>Robinhood gives every asset the same hero + chart treatment. A helper gets it too: spend climbing toward a dashed allowance line, days underneath, rules as a flat list.</div>
+</div>
+
+
+<!-- 5 · CELEBRATE -->
+<div class="col">
+<div class="phone"><div class="notch"></div>
+  <div class="celebrate">
+    <div class="confetti">
+      <i style="left:40px;top:120px;background:#fff;transform:rotate(20deg)"></i><i style="left:300px;top:150px;background:#e3ece6;transform:rotate(-30deg)"></i><i style="left:90px;top:620px;background:#c9cdc8;transform:rotate(60deg)"></i><i style="left:330px;top:560px;background:#fff;transform:rotate(-10deg)"></i><i style="left:200px;top:90px;background:#e3ece6;transform:rotate(45deg)"></i><i style="left:60px;top:400px;background:#fff;transform:rotate(-50deg)"></i><i style="left:320px;top:380px;background:#c9cdc8;transform:rotate(15deg)"></i>
+    </div>
+    <div class="stamp"><svg class="mk" width="96" height="96"><use href="#sigil-mark"/></svg></div>
+    <h2>Shopper is sealed.</h2>
+    <p>It has its own wallet with $100 in it, and it can't spend more than $50 without asking you.</p>
+    <div class="keyrow"><div class="btn p">Connect to Claude</div><div class="btn">Later</div></div>
+    <div style="position:absolute;bottom:34px;left:0;right:0;font-size:12px;opacity:.6">Takes about a minute · we'll walk you through it</div>
+  </div>
+</div>
+<div class="cap"><b>Moments · the seal lands</b>First deposit, first stock, first referral all get a full-screen green moment with confetti. Ours: first seal, first helper, first week with nothing to approve.</div>
+</div>
+
+
+
+<div class="notes">
+  <div class="card">
+    <h3>Where the mark lives</h3>
+    <ul>
+      <li><i class="sg">S</i><span><b>App icon.</b> One tile, no wordmark. The dissolving edge is what makes it ours on a shelf of flat squares.</span></li>
+      <li><i class="sg">S</i><span><b>Welcome and loading.</b> Full size on charcoal, stamping in. Tiles drift while something loads.</span></li>
+      <li><i class="sg">S</i><span><b>Top bar and sidebar.</b> Small, next to the name, nothing else.</span></li>
+      <li><i class="sg">S</i><span><b>Sealed moments.</b> Approval, new helper, first payment. The stamp animation plus a ring.</span></li>
+      <li><i class="sg">S</i><span><b>Helpers.</b> A helper's avatar is the mark in sage. People and places keep the plain charcoal seal: smaller, quieter, so the helper reads as "ours".</span></li>
+      <li><i class="hv">HV</i><span><b>Not everywhere.</b> One mark per screen at most, plus the tiny seals beside names. It should feel rare, like a stamp, not like a logo.</span></li>
+    </ul>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Files</h3>
+    <ul>
+      <li><span><b>brand/mark.svg</b> · the mark, one file, scales to any size</span></li>
+      <li><span><b>public/sigil-mark.svg</b> · same file, ready for the app</span></li>
+      <li><span><b>brand/gen_mark.py</b> · regenerates it; change the seed for a different scatter</span></li>
+    </ul>
+  </div>
+</div>
+
+</div>
+</body></html>

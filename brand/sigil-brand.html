@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Sigil — brand sheet v1</title>
+<style>
+  :root{--bg:#f5f5f3;--paper:#fff;--ink:#1c1c1a;--ink-2:#6b6b66;--ink-3:#a3a39d;--line:#e8e8e4;--tint:#f0efea;--blue:#2f6fed;--blue-soft:#e6eefc;--green:#1f8a5b;--amber:#b7791f}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"SF Pro Display",Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:56px 48px;-webkit-font-smoothing:antialiased}
+  h1{font-size:28px;font-weight:600;letter-spacing:-.02em}
+  .lede{color:var(--ink-2);margin:8px 0 44px;max-width:640px;line-height:1.5}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600;margin:48px 0 16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+  .tile{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px}
+  .tile .art{height:150px;display:flex;align-items:center;justify-content:center;background:var(--tint);border-radius:14px}
+  .tile.dark .art{background:var(--ink)}
+  .tile b{font-size:15px;font-weight:600}
+  .tile p{font-size:13px;color:var(--ink-2);line-height:1.5}
+  .tag{font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-soft);padding:3px 8px;border-radius:99px;display:inline-block;margin-left:6px;vertical-align:2px}
+  .wordmarks{display:flex;gap:20px;flex-wrap:wrap}
+  .wm{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:40px 48px;display:flex;align-items:center;gap:16px}
+  .wm.dark{background:var(--ink);color:#fff}
+  .wm .t{font-size:44px;font-weight:600;letter-spacing:-.035em}
+  .wm .t.light{font-weight:500;letter-spacing:-.02em}
+  .wm .t.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;letter-spacing:-.01em;font-size:38px}
+  .strip{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:24px 28px;display:flex;gap:40px;align-items:center;flex-wrap:wrap}
+  .name{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600}
+  .name small{font-weight:400;color:var(--ink-2)}
+  .sw{display:flex;gap:12px;flex-wrap:wrap}
+  .sw div{width:132px;border-radius:14px;padding:14px;font-size:12px;height:96px;display:flex;flex-direction:column;justify-content:flex-end;border:1px solid var(--line)}
+  .sw b{display:block;font-size:13px}
+  .icons{display:flex;gap:28px;align-items:flex-end}
+  .icon{border-radius:22.5%;display:flex;align-items:center;justify-content:center;background:var(--ink)}
+  .notes{margin-top:48px;max-width:760px;color:var(--ink-2);line-height:1.6;font-size:15px}
+  .notes b{color:var(--ink)}
+</style>
+</head>
+<body>
+<h1>Sigil — brand sheet v1</h1>
+<p class="lede">A sigil is a seal: a symbol that proves who stands behind a thing. That is the whole product. Every person, every agent, every transaction carries one. The mark should work as a logo, as a 14px verified badge next to a name, and stamped on a receipt.</p>
+
+<h2>Mark concepts</h2>
+<div class="grid">
+
+  <div class="tile">
+    <div class="art">
+      <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+        <circle cx="44" cy="44" r="34" stroke="#1c1c1a" stroke-width="7"/>
+        <circle cx="44" cy="44" r="12" fill="#1c1c1a"/>
+      </svg>
+    </div>
+    <b>A · Seal <span class="tag">lead</span></b>
+    <p>Ring and core. The ring is the boundary you set, the core is what's inside it. Reads at any size, already the ◍ from the mockup. Becomes the verified badge unchanged.</p>
+  </div>
+
+  <div class="tile">
+    <div class="art">
+      <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+        <circle cx="44" cy="44" r="34" stroke="#1c1c1a" stroke-width="7"/>
+        <path d="M30 45l10 10 18-20" stroke="#1c1c1a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <b>A2 · Seal, checked</b>
+    <p>Same ring with an approval tick. More literal, more "verified". Risk: looks like every other checkmark badge.</p>
+  </div>
+
+  <div class="tile">
+    <div class="art">
+      <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+        <circle cx="33" cy="44" r="22" stroke="#1c1c1a" stroke-width="7"/>
+        <circle cx="55" cy="44" r="22" stroke="#1c1c1a" stroke-width="7"/>
+        <path d="M44 25.5a22 22 0 0 1 0 37a22 22 0 0 1 0-37z" fill="#1c1c1a"/>
+      </svg>
+    </div>
+    <b>B · Two parties</b>
+    <p>Two rings overlapping, the shared lens filled in. Person and agent, or agent and agent: the sigil lives where they agree. Tells the agent-to-agent story best.</p>
+  </div>
+
+  <div class="tile">
+    <div class="art">
+      <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+        <path d="M44 8l32 18v36L44 80 12 62V26z" stroke="#1c1c1a" stroke-width="7" stroke-linejoin="round"/>
+        <circle cx="44" cy="44" r="10" fill="#1c1c1a"/>
+      </svg>
+    </div>
+    <b>C · Hex seal</b>
+    <p>Hexagon wax seal with a core. Feels protocol-y and crypto-adjacent. Sharper, less friendly than A.</p>
+  </div>
+
+  <div class="tile">
+    <div class="art">
+      <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+        <path d="M58 24c-4-6-11-9-18-8-9 1-15 8-14 16 1 7 7 10 16 12s15 5 16 12c1 8-5 15-14 16-7 1-14-2-18-8" stroke="#1c1c1a" stroke-width="7.5" stroke-linecap="round"/>
+        <circle cx="44" cy="44" r="5" fill="#1c1c1a"/>
+      </svg>
+    </div>
+    <b>D · Rune S</b>
+    <p>A single-stroke S with a point at its heart, like a drawn glyph. Ownable as a monogram, weakest at badge size.</p>
+  </div>
+
+  <div class="tile dark">
+    <div class="art">
+      <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+        <circle cx="44" cy="44" r="34" stroke="#fff" stroke-width="7"/>
+        <circle cx="44" cy="44" r="12" fill="#2f6fed"/>
+      </svg>
+    </div>
+    <b>A · on dark, blue core</b>
+    <p>The core takes the one brand colour. White ring on ink is the app icon.</p>
+  </div>
+
+</div>
+
+<h2>Wordmark</h2>
+<div class="wordmarks">
+  <div class="wm">
+    <svg width="40" height="40" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#1c1c1a" stroke-width="7"/><circle cx="44" cy="44" r="12" fill="#1c1c1a"/></svg>
+    <span class="t">Sigil</span>
+  </div>
+  <div class="wm">
+    <span class="t light">sigil</span>
+    <svg width="22" height="22" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#2f6fed" stroke-width="9"/><circle cx="44" cy="44" r="14" fill="#2f6fed"/></svg>
+  </div>
+  <div class="wm dark">
+    <svg width="40" height="40" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#fff" stroke-width="7"/><circle cx="44" cy="44" r="12" fill="#2f6fed"/></svg>
+    <span class="t">Sigil</span>
+  </div>
+  <div class="wm">
+    <span class="t mono">sigil_</span>
+  </div>
+</div>
+
+<h2>The mark as a verified badge</h2>
+<div class="strip">
+  <div class="name">Marco <svg width="15" height="15" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#2f6fed" stroke-width="10"/><circle cx="44" cy="44" r="15" fill="#2f6fed"/></svg></div>
+  <div class="name">Shopper <svg width="15" height="15" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#2f6fed" stroke-width="10"/><circle cx="44" cy="44" r="15" fill="#2f6fed"/></svg> <small>· agent</small></div>
+  <div class="name">Apple Store <svg width="15" height="15" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#2f6fed" stroke-width="10"/><circle cx="44" cy="44" r="15" fill="#2f6fed"/></svg> <small>· business</small></div>
+  <div class="name" style="color:var(--ink-3)">Unknown wallet <svg width="15" height="15" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#a3a39d" stroke-width="10" stroke-dasharray="14 10"/></svg> <small>· not sealed</small></div>
+  <div class="name" style="color:var(--amber)">Saver <svg width="15" height="15" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#b7791f" stroke-width="10"/><circle cx="44" cy="44" r="15" fill="#b7791f"/></svg> <small>· paused</small></div>
+</div>
+<p style="font-size:13px;color:var(--ink-2);margin-top:10px">Solid blue = sealed. Dashed grey = unverified, the only time the ring is broken. Amber core = sealed but paused. The badge never changes shape, only state.</p>
+
+<h2>App icon</h2>
+<div class="icons">
+  <div class="icon" style="width:120px;height:120px"><svg width="72" height="72" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#fff" stroke-width="7"/><circle cx="44" cy="44" r="12" fill="#2f6fed"/></svg></div>
+  <div class="icon" style="width:60px;height:60px"><svg width="36" height="36" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#fff" stroke-width="8"/><circle cx="44" cy="44" r="13" fill="#2f6fed"/></svg></div>
+  <div class="icon" style="width:32px;height:32px"><svg width="20" height="20" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#fff" stroke-width="10"/><circle cx="44" cy="44" r="15" fill="#2f6fed"/></svg></div>
+  <div class="icon" style="width:120px;height:120px;background:#2f6fed"><svg width="72" height="72" viewBox="0 0 88 88" fill="none"><circle cx="44" cy="44" r="34" stroke="#fff" stroke-width="7"/><circle cx="44" cy="44" r="12" fill="#fff"/></svg></div>
+</div>
+
+<h2>Colour</h2>
+<div class="sw">
+  <div style="background:#1c1c1a;color:#fff;border-color:transparent"><b>Ink</b>#1C1C1A</div>
+  <div style="background:#fff"><b>Paper</b>#FFFFFF</div>
+  <div style="background:#f0efea"><b>Tint</b>#F0EFEA</div>
+  <div style="background:#2f6fed;color:#fff;border-color:transparent"><b>Seal blue</b>#2F6FED · verified only</div>
+  <div style="background:#1f8a5b;color:#fff;border-color:transparent"><b>Safe</b>#1F8A5B</div>
+  <div style="background:#b7791f;color:#fff;border-color:transparent"><b>Needs you</b>#B7791F</div>
+  <div style="background:#c0392b;color:#fff;border-color:transparent"><b>Stop</b>#C0392B</div>
+</div>
+
+<div class="notes">
+  <p><b>Recommendation:</b> mark A (Seal) as the primary, B (Two parties) kept as a secondary illustration for the agent-to-agent story on marketing pages. Wordmark in the system sans, semibold, tight tracking, capital S. Blue is spent on exactly one thing, the seal, so when your mom sees blue she knows it means verified.</p>
+  <p style="margin-top:12px"><b>Voice words:</b> sealed, unsealed, seal it, in your keeping. "Approve" stays "Approve" in the UI; the brand language lives around it, not on the buttons.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Sigil · signature asset study</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--char:#1f2321;--paper:#f7f6f2;--ink2:#5f6561;--sage:#2f5d4a;--clay:#8a5a4a;--line:#e6e5df}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:#e9e7e1;color:var(--char);padding:40px;-webkit-font-smoothing:antialiased}
+h1{font-family:Newsreader,serif;font-weight:400;font-size:38px;letter-spacing:-.02em}
+.lead{color:var(--ink2);margin-top:8px;max-width:720px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:32px}
+.c{background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column}
+.c .img{background:var(--paper);aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.c img{width:100%;height:100%;object-fit:cover}
+.c .b{padding:20px 22px 22px}
+.c h2{font-family:Newsreader,serif;font-weight:400;font-size:24px}
+.c .tag{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--sage);margin-bottom:6px}
+.c p{color:var(--ink2);font-size:14px;line-height:1.5;margin-top:8px}
+.c ul{margin-top:12px;font-size:13px;line-height:1.5;padding-left:0;list-style:none}
+.c li{padding:5px 0;border-top:1px solid var(--line);display:flex;gap:8px}
+.c li i{font-style:normal;flex:none;width:18px;text-align:center}
+.uses{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.uses span{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--paper);color:var(--ink2)}
+.rec{display:inline-block;background:var(--sage);color:#fff;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.strip{display:flex;gap:14px;align-items:center;margin-top:14px}
+.strip .ic{border-radius:22%;background:var(--paper);overflow:hidden;border:1px solid var(--line)}
+.strip .ic img{width:100%;height:100%;object-fit:cover}
+.note{margin-top:28px;color:var(--ink2);font-size:13px;max-width:720px;line-height:1.5}
+</style></head><body>
+<h1>Three ways to picture Sigil</h1>
+<p class="lead">One render each, straight from the brief, no retouching. Judge the idea, not the pixels: whichever you pick gets a proper pass, a flat vector version for the app, and a motion version.</p>
+<div class="grid">
+
+<div class="c">
+  <div class="img"><img src="generated/07-seal-imprint.png" alt="Seal imprint"></div>
+  <div class="b">
+    <div class="tag">Direction 1<span class="rec">Recommended</span></div>
+    <h2>The Seal Imprint</h2>
+    <p>A wax seal pressed into paper. The S is two strokes woven into one letter: charcoal for the person, sage for the helper. Says the name, the trust promise and "you and your AI, together" in one object.</p>
+    <div class="strip"><div class="ic" style="width:64px;height:64px"><img src="generated/07-seal-imprint.png"></div><div class="ic" style="width:40px;height:40px"><img src="generated/07-seal-imprint.png"></div><div class="ic" style="width:24px;height:24px"><img src="generated/07-seal-imprint.png"></div><span style="font-size:12px;color:var(--ink2)">reads at icon sizes</span></div>
+    <ul>
+      <li><i>＋</i>A real object: tactile, timeless, nothing like it in crypto</li>
+      <li><i>＋</i>Becomes the "sealed" stamp animation on every approval</li>
+      <li><i>－</i>Needs a clean flat version for tiny sizes (easy)</li>
+    </ul>
+    <div class="uses"><span>App icon</span><span>Loading</span><span>Approval stamp</span><span>Empty states</span><span>Website hero</span></div>
+  </div>
+</div>
+
+<div class="c">
+  <div class="img"><img src="generated/08-two-hands.png" alt="Two hands, one coin"></div>
+  <div class="b">
+    <div class="tag">Direction 2</div>
+    <h2>Two Hands, One Coin</h2>
+    <p>A human hand in soft wash, a second hand drawn as one calm sage line. Between them, one coin carrying the seal. The story of the product in a picture: a person and their helper, holding the same money.</p>
+    <ul>
+      <li><i>＋</i>Warmest and most human of the three; great for mum</li>
+      <li><i>＋</i>A whole illustration language we can extend (hands + line figures)</li>
+      <li><i>－</i>It's a scene, not a mark: won't survive as an icon</li>
+    </ul>
+    <div class="uses"><span>Welcome screen</span><span>Website</span><span>Ads</span><span>Celebration moments</span></div>
+  </div>
+</div>
+
+<div class="c">
+  <div class="img"><img src="generated/09-ledger-thread.png" alt="Ledger thread"></div>
+  <div class="b">
+    <div class="tag">Direction 3</div>
+    <h2>The Ledger Thread</h2>
+    <p>One continuous line, like the chart on Home, threaded through small seal tiles like beads. "Every move, sealed." Flat, graphic, animates beautifully as a loader or progress bar.</p>
+    <ul>
+      <li><i>＋</i>Ties directly to the hero chart already in the app</li>
+      <li><i>＋</i>Flexible: banner, divider, loader, motion logo</li>
+      <li><i>－</i>Abstract; needs the wordmark next to it to mean anything</li>
+    </ul>
+    <div class="uses"><span>Loader</span><span>Dividers</span><span>Social banners</span><span>Motion ident</span></div>
+  </div>
+</div>
+</div>
+<p class="note">They aren't exclusive. The honest pairing is 1 + 2: the Seal Imprint as the mark and app icon, the hand illustrations as the voice of the website and onboarding. The Thread could live on as the loading animation either way.</p>
+</body></html>

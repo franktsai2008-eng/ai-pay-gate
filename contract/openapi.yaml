@@ -1,0 +1,189 @@
+openapi: 3.1.0
+info:
+  title: Sigil API
+  version: 0.1.0
+  description: |
+    Contract between the Sigil UI and backend. Shapes mirror src/api/types.ts in the UI repo.
+    Auth: Bearer token on every call. Money amounts are decimal strings, never floats.
+servers:
+  - url: https://api.sigil.money/v1
+paths:
+  /me:
+    get: { summary: Current user, responses: { "200": { $ref: "#/components/responses/User" } } }
+  /me/verification:
+    post:
+      summary: Start verification (seal the user)
+      requestBody: { content: { application/json: { schema: { type: object, properties: { method: { enum: [id, passkey] } } } } } }
+      responses: { "200": { $ref: "#/components/responses/User" } }
+  /wallets:
+    get: { summary: All wallets the user owns or vouches for, responses: { "200": { description: ok, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Wallet" } } } } } } }
+  /parties:
+    get: { summary: Known counterparties (people, agents, businesses), responses: { "200": { description: ok, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Party" } } } } } } }
+  /agents:
+    get: { summary: The user's agents, responses: { "200": { description: ok, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Agent" } } } } } } }
+    post:
+      summary: Create an agent + its wallet + its MCP credentials
+      requestBody: { content: { application/json: { schema: { $ref: "#/components/schemas/CreateAgentRequest" } } } }
+      responses: { "201": { description: created, content: { application/json: { schema: { $ref: "#/components/schemas/CreateAgentResponse" } } } } }
+  /agents/{id}:
+    get: { summary: One agent, responses: { "200": { $ref: "#/components/responses/Agent" } } }
+    delete: { summary: Remove agent, sweep its wallet to owner, responses: { "204": { description: removed } } }
+  /agents/{id}/policy:
+    patch:
+      summary: Update spending policy (partial)
+      requestBody: { content: { application/json: { schema: { $ref: "#/components/schemas/AgentPolicy" } } } }
+      responses: { "200": { $ref: "#/components/responses/Agent" } }
+  /agents/{id}/pause:
+    post: { summary: Pause agent (seal state -> paused), responses: { "200": { $ref: "#/components/responses/Agent" } } }
+  /agents/{id}/resume:
+    post: { summary: Resume agent, responses: { "200": { $ref: "#/components/responses/Agent" } } }
+  /transactions:
+    get:
+      summary: Transactions across all the user's wallets, newest first
+      parameters:
+        - { name: status, in: query, schema: { type: string }, description: comma-separated TxStatus }
+        - { name: limit, in: query, schema: { type: integer, default: 50 } }
+      responses: { "200": { description: ok, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Transaction" } } } } } }
+    post:
+      summary: Send money (human-initiated). Agents use the MCP server, which calls the same internal path.
+      requestBody: { content: { application/json: { schema: { $ref: "#/components/schemas/SendRequest" } } } }
+      responses: { "201": { $ref: "#/components/responses/Transaction" } }
+  /transactions/{id}/approve:
+    post: { summary: Human approves a pending agent transaction, responses: { "200": { $ref: "#/components/responses/Transaction" } } }
+  /transactions/{id}/decline:
+    post:
+      summary: Human declines
+      requestBody: { content: { application/json: { schema: { type: object, properties: { reason: { type: string } } } } } }
+      responses: { "200": { $ref: "#/components/responses/Transaction" } }
+  /events:
+    get:
+      summary: Server-sent events stream of Event objects (tx.created, tx.updated, agent.updated, wallet.updated)
+      responses: { "200": { description: text/event-stream } }
+
+components:
+  responses:
+    User: { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/User" } } } }
+    Agent: { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Agent" } } } }
+    Transaction: { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Transaction" } } } }
+  schemas:
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount: { type: string, description: decimal string, e.g. "220.00" }
+        currency: { enum: [USDC, USDT, ETH, BTC, HKD, USD] }
+    SealState: { enum: [sealed, unsealed, paused] }
+    Party:
+      type: object
+      required: [id, kind, name, seal]
+      properties:
+        id: { type: string }
+        kind: { enum: [person, agent, business] }
+        name: { type: string }
+        seal: { $ref: "#/components/schemas/SealState" }
+        sealedAt: { type: string, format: date-time }
+        avatarUrl: { type: string }
+    User:
+      allOf:
+        - $ref: "#/components/schemas/Party"
+        - type: object
+          properties:
+            email: { type: string }
+            displayCurrency: { type: string }
+            verification:
+              type: object
+              properties:
+                status: { enum: [none, pending, verified] }
+                method: { enum: [id, passkey] }
+                at: { type: string, format: date-time }
+    Wallet:
+      type: object
+      required: [id, ownerId, label, address, balance, fiatBalance, change24h]
+      properties:
+        id: { type: string }
+        ownerId: { type: string }
+        label: { type: string }
+        address: { type: string }
+        balance: { $ref: "#/components/schemas/Money" }
+        fiatBalance: { $ref: "#/components/schemas/Money" }
+        change24h: { $ref: "#/components/schemas/Money" }
+    AgentPolicy:
+      type: object
+      properties:
+        autoApproveUpTo: { $ref: "#/components/schemas/Money" }
+        weeklyAllowance: { $ref: "#/components/schemas/Money" }
+        allowedPayees: { type: array, items: { type: string } }
+        canAddPayees: { type: boolean }
+        canWithdraw: { type: boolean }
+        canViewBalances: { type: boolean }
+    Agent:
+      allOf:
+        - $ref: "#/components/schemas/Party"
+        - type: object
+          required: [ownerId, provider, purpose, walletId, policy, spentThisWeek, mcp]
+          properties:
+            ownerId: { type: string }
+            provider: { enum: [claude, gpt, gemini, other] }
+            purpose: { type: string }
+            walletId: { type: string }
+            policy: { $ref: "#/components/schemas/AgentPolicy" }
+            spentThisWeek: { $ref: "#/components/schemas/Money" }
+            lastActiveAt: { type: string, format: date-time }
+            mcp:
+              type: object
+              properties:
+                url: { type: string }
+                keyHint: { type: string, description: last 4 chars only }
+                connected: { type: boolean }
+    TxFlag:
+      type: object
+      required: [code]
+      properties:
+        code: { enum: [over_auto_limit, new_payee, unsealed_payee, over_weekly_allowance, unusual_time] }
+        limit: { $ref: "#/components/schemas/Money" }
+        remaining: { $ref: "#/components/schemas/Money" }
+    Transaction:
+      type: object
+      required: [id, fromWalletId, toPartyId, initiatedBy, amount, fiatAmount, status, createdAt, flags]
+      properties:
+        id: { type: string }
+        fromWalletId: { type: string }
+        toPartyId: { type: string }
+        initiatedBy: { type: string }
+        amount: { $ref: "#/components/schemas/Money" }
+        fiatAmount: { $ref: "#/components/schemas/Money" }
+        status: { enum: [pending_approval, approved, declined, settled, failed, expired] }
+        memo: { type: string }
+        reason: { type: string, description: agent's own explanation }
+        createdAt: { type: string, format: date-time }
+        settledAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+        flags: { type: array, items: { $ref: "#/components/schemas/TxFlag" } }
+    SendRequest:
+      type: object
+      required: [fromWalletId, to, amount]
+      properties:
+        fromWalletId: { type: string }
+        to:
+          oneOf:
+            - { type: object, properties: { partyId: { type: string } }, required: [partyId] }
+            - { type: object, properties: { address: { type: string } }, required: [address] }
+        amount: { $ref: "#/components/schemas/Money" }
+        memo: { type: string }
+    CreateAgentRequest:
+      type: object
+      required: [name, provider, purpose, policy]
+      properties:
+        name: { type: string }
+        provider: { enum: [claude, gpt, gemini, other] }
+        purpose: { type: string }
+        policy: { $ref: "#/components/schemas/AgentPolicy" }
+        initialFunding: { $ref: "#/components/schemas/Money" }
+    CreateAgentResponse:
+      type: object
+      required: [agent, mcpConfig]
+      properties:
+        agent: { $ref: "#/components/schemas/Agent" }
+        mcpConfig:
+          type: object
+          properties: { url: { type: string }, key: { type: string, description: full secret, shown once } }
