@@ -114,7 +114,7 @@ export default function HomePage() {
               <PartyIcon party={incoming ? by : to} kind={pending ? "warn" : incoming ? "in" : undefined} />
               <div className="t grow">
                 <b className="ellipsis">{incoming ? `${by?.name} sent you money` : by?.kind === "agent" ? `${by.name} ${pending ? "wants to pay" : "paid"} ${to?.name}` : to?.name}</b>
-                <span>{pending ? "Waiting for you · " : t.memo ? t.memo + " · " : ""}{fmtWhen(t.createdAt)}{by?.kind === "agent" && !pending && t.status === "settled" ? " · auto-approved" : ""}</span>
+                <span>{pending ? "Waiting for you · " : t.memo ? t.memo + " · " : ""}{fmtWhen(t.createdAt)}{by?.kind === "agent" && !pending && t.status === "settled" ? (t.flags.length === 0 ? " · auto-approved" : " · you approved") : ""}</span>
               </div>
               <div className={"amt num" + (incoming ? " in" : "")}>{incoming ? "+" : pending ? "" : "−"}{fmtMoney(t.fiatAmount)}{pending && <small>waiting</small>}</div>
             </div>
