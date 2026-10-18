@@ -548,7 +548,14 @@ function scriptedDelivery(o: Order): string {
   const kind = seller.seller?.scripted;
   if (kind === "feed") {
     const coins = ["BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "DOGE", "AVAX", "DOT", "LINK", "MATIC", "TON", "TRX", "LTC", "BCH", "NEAR", "UNI", "ATOM", "XLM", "ICP", "APT", "ARB", "OP", "FIL", "HBAR", "VET", "INJ", "SUI", "SEI", "TIA", "RNDR", "IMX", "STX", "AAVE", "MKR", "GRT", "ALGO", "EGLD", "SAND", "MANA", "AXS", "FTM", "THETA", "FLOW", "CHZ", "KAS", "XMR", "ETC", "QNT", "RUNE"];
-    const base: Record<string, number> = { BTC: 67000, ETH: 3400, SOL: 160, BNB: 590 };
+    // plausible magnitudes for every coin, so the delivery reads like a real feed (a buyer's AI checks these)
+    const base: Record<string, number> = {
+      BTC: 81736, ETH: 3412, SOL: 158.4, BNB: 592, XRP: 2.41, ADA: 0.67, DOGE: 0.19, AVAX: 29.8, DOT: 5.9, LINK: 17.6,
+      MATIC: 0.42, TON: 5.3, TRX: 0.21, LTC: 94.2, BCH: 412, NEAR: 4.6, UNI: 8.9, ATOM: 6.4, XLM: 0.31, ICP: 8.1,
+      APT: 7.9, ARB: 0.71, OP: 1.42, FIL: 4.3, HBAR: 0.18, VET: 0.034, INJ: 18.4, SUI: 2.9, SEI: 0.36, TIA: 4.8,
+      RNDR: 6.2, IMX: 1.35, STX: 1.6, AAVE: 215, MKR: 1480, GRT: 0.17, ALGO: 0.24, EGLD: 28.5, SAND: 0.38, MANA: 0.41,
+      AXS: 5.1, FTM: 0.72, THETA: 1.3, FLOW: 0.62, CHZ: 0.081, KAS: 0.12, XMR: 168, ETC: 21.4, QNT: 92, RUNE: 3.7,
+    };
     return JSON.stringify({
       date: today(),
       prices: coins.map((c, i) => ({ coin: c, usd: base[c] ?? Math.round((0.1 + ((i * 37) % 97) * 1.7) * 100) / 100, date: today() })),
