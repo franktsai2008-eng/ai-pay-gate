@@ -22,6 +22,19 @@ export interface Owner {
   token: string;
   /** real time (not the demo clock) of the last passcode login; sensitive changes need a recent one */
   lastLoginAt?: number;
+  /** simulated balance of the owner's main wallet (Sigil UI); undefined means the seed default */
+  mainBalanceMicro?: number;
+}
+
+/** A human-initiated send from the owner's main wallet (Sigil UI "Send"). Simulated, like every other transfer. */
+export interface SigilSend {
+  id: string;
+  ownerId: string;
+  toPartyId: string;
+  payTo: string;
+  amountMicro: number;
+  memo?: string;
+  at: number;
 }
 
 export interface Rules {
@@ -65,6 +78,14 @@ export interface Agent {
   /** risk points (SPEC 5): internal; told to the owner, never shown on the public profile */
   risk?: { points: number; level: RiskLevel; reasons: RiskReason[]; at: number };
   riskStatus: "none" | "restricted" | "suspended";
+  /** Sigil UI fields: which AI product runs it, what it is for, when it was created */
+  provider?: "claude" | "gpt" | "gemini" | "other";
+  purpose?: string;
+  createdAt?: number;
+  /** set the first time the agent token is used, so the owner sees "connected" */
+  mcpConnected?: boolean;
+  /** removed by the owner: hidden from the Sigil UI, token revoked, wallet swept to the owner */
+  removedAt?: number;
 }
 
 export type RiskLevel = "none" | "watch" | "restricted" | "suspended";
@@ -237,4 +258,6 @@ export interface State {
   decisionLog?: DecisionLogEntry[];
   /** last entry's seq and hash, kept apart from the log so cutting entries off the end shows; production publishes it */
   decisionHead?: { seq: number; hash: string };
+  /** human-initiated sends from the Sigil UI */
+  sigilSends?: SigilSend[];
 }

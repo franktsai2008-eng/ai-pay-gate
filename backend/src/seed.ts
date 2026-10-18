@@ -87,6 +87,10 @@ export function buildSeed(t: number): State {
     balanceMicro: 50 * M,
     token: process.env.AGENT_TOKEN || "agent_demo_mia",
     buyerTrust: 0.8,
+    provider: "claude",
+    purpose: "Buys data and reports for Mia's shop",
+    createdAt: t - 30 * DAY,
+    mcpConnected: true,
     rules: {
       autonomy: "small_auto",
       autoLimitMicro: 5 * M,

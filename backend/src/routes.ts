@@ -58,8 +58,12 @@ function ownerAuth(c: Context): Owner {
 
 function agentAuth(c: Context): Agent {
   const token = bearer(c);
-  const agent = Object.values(state.agents).find((a) => a.token === token && a.rules);
+  const agent = Object.values(state.agents).find((a) => a.token === token && a.rules && !a.removedAt);
   if (!token || !agent) throw new ApiError(401, "UNAUTHORIZED", "Agent token required.");
+  if (!agent.mcpConnected) {
+    agent.mcpConnected = true;
+    markDirty();
+  }
   return agent;
 }
 
@@ -97,7 +101,7 @@ const DEMO_PASSCODE = process.env.DEMO_PASSCODE ?? "demo";
 
 /** Wrong passcodes per client: 10 in 10 minutes, then wait. Per client, so nobody can lock Mia out from elsewhere. */
 const wrongTries = new Map<string, number[]>();
-function checkPasscode(c: Context, passcode: string | undefined): boolean {
+export function checkPasscode(c: Context, passcode: string | undefined): boolean {
   const who = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
   const t = Date.now();
   const recent = (wrongTries.get(who) ?? []).filter((x) => t - x < 10 * 60_000);

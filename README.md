@@ -71,17 +71,18 @@ Risk is a separate number from credit. It answers a different question: how like
 ## Architecture
 
 ```
-Claude Desktop ──MCP (stdio)──> MCP server ──HTTP──┐
-                                                   ▼
-Owner web app (phone) ──HTTP, polling──> Backend API (Node + TypeScript + Hono)
-                                                   │
-                              in-memory state, saved to a JSON snapshot
+Claude Desktop ──MCP (stdio)──> MCP server ──HTTP /api/v1/agent/* ──┐
+                                                                    ▼
+Sigil phone app (React) ──HTTP /v1 + server-sent events──> Backend (Node + TypeScript + Hono)
+                                                                    │
+                                               in-memory state, saved to a JSON snapshot
 ```
 
-- **Backend** (`backend/`). One Node process in TypeScript, using Hono for HTTP and Zod for structured judge output. All state lives in memory and is saved to `backend/data/state.json` every 2 seconds. On first boot, or after `POST /api/v1/admin/reset`, it loads a demo seed: Mia, her AI, 20 past payments, three sellers with listings, four background sellers and a scam ring. A background tick runs every second for deliveries, expiring approvals and closing orders. The owner app polls `GET /api/v1/owner/feed` for live updates.
+- **Backend** (`backend/`). One Node process in TypeScript, using Hono for HTTP and Zod for structured judge output. All state lives in memory and is saved to `backend/data/state.json` every 2 seconds. On first boot, or after `POST /api/v1/admin/reset`, it loads a demo seed: Mia, her AI, 20 past payments, three sellers with listings, four background sellers and a scam ring. A background tick runs every second for deliveries, expiring approvals and closing orders.
+- **Two faces of the same engine.** `/api/v1` is the gate's own API (owner app endpoints, the agent tools the MCP server calls, public seller profiles, admin demo tools). `/v1` is the contract the phone app was built against (`frontend/contract/openapi.yaml`), served by `backend/src/sigil.ts` on top of the same engine: a yellow payment is a `pending_approval` transaction with `flags`, approving it on the phone calls the same `approve()` the owner API uses, and `GET /v1/events` streams every gate event as `tx.created`, `tx.updated`, `agent.updated` and `wallet.updated` (the app also polls every 2.5 seconds, because some tunnels hold a stream back; the two are deduplicated by id). The gate's reasons are translated to the five flags the UI knows; a red light shows as a declined transaction whose memo starts with `Blocked`.
 - **Three kinds of access.** The owner token is used by the web app only. The agent token can only call `/agent/*` endpoints. It can't approve payments, change rules, pause or withdraw. Admin demo tools need a separate admin key.
-- **MCP server** (`mcp-backup/`). A backup server that gives Claude Desktop eight tools: `find_offers`, `check_payment`, `pay`, `payment_status`, `get_delivery`, `balance`, `history`, `my_rules`. It holds only the agent token and passes the backend's answers through unchanged. Seller descriptions and deliveries come back in fields named `untrusted_*`, and the tool descriptions tell the model to treat them as data. Listing titles and the red-light evidence excerpt also contain seller text. The gate is still the real guard.
-- **Tests** (`backend/test/`). 23 tests on Node's own test runner. They cover the demo script for all three lights, pause, duplicates, agent scope, the money flow checks, the $5 limit for unverified owners, the withdraw passcode, the decision log chain, trust, independence, recompute and risk.
+- **MCP server** (`mcp/`). The MCP server that gives Claude Desktop eight tools: `find_offers`, `check_payment`, `pay`, `payment_status`, `get_delivery`, `balance`, `history`, `my_rules`. It holds only the agent token and passes the backend's answers through unchanged. Seller descriptions and deliveries come back in fields named `untrusted_*`, and the tool descriptions tell the model to treat them as data. Listing titles and the red-light evidence excerpt also contain seller text. The gate is still the real guard.
+- **Tests** (`backend/test/`). 30 tests on Node's own test runner. They cover the demo script for all three lights, pause, duplicates, agent scope, the money flow checks, the $5 limit for unverified owners, the withdraw passcode, the decision log chain, trust, independence, recompute and risk, and the phone app's contract: the three lights as the UI sees them, approve and decline from the phone, creating and removing a helper, a human send, and the event translation.
 
 ## Run it locally
 
@@ -90,20 +91,30 @@ Needs Node 22.9 or newer.
 ```bash
 cd backend
 npm install
-npm run dev        # API on http://localhost:8787/api/v1 (health check: /health)
-npm test           # 23 tests
+npm run dev        # API on http://localhost:8787/api/v1 (health check: /health); phone contract on /v1
+npm test           # 30 tests
 npm run naive -- --script   # gullible agent, fixed script, no API key needed
 npm run naive               # gullible agent driven by a model (needs ANTHROPIC_API_KEY)
 ```
 
-Backup MCP server:
+Phone app:
 
 ```bash
-cd mcp-backup
+cd frontend
+npm install
+npm run dev                                          # sample data, no backend needed
+VITE_API_URL=http://localhost:8787/v1 npm run dev    # real backend; sign in with the demo passcode
+npm run build                                        # tsc + vite; `vite preview` serves the build
+```
+
+MCP server:
+
+```bash
+cd mcp
 npm install
 ```
 
-Then add it to Claude Desktop's config with `command: node`, `args: ["<path>/mcp-backup/index.mjs"]`, `API_BASE`, and `AGENT_TOKEN` (required; the demo value is `agent_demo_mia`). See `mcp-backup/README.md`.
+Then add it to Claude Desktop's config with `command: node`, `args: ["<path>/mcp/index.mjs"]`, `API_BASE`, and `AGENT_TOKEN` (required; the demo value is `agent_demo_mia`). See `mcp/README.md`.
 
 ### Environment variables
 
@@ -140,9 +151,13 @@ Put them in `backend/.env` (git-ignored) or the shell. Every one is optional for
 
 ## Frontend
 
-The owner web app is built by teammates and will be added to this repo.
+The phone app is **Sigil** (`frontend/`): React 19, Vite and TypeScript, responsive down to 390px, with its own brand mark. Screens: Welcome, Home (balance over time, what's waiting, your helpers), Send, Helpers, Helper detail (spend against allowance, rules, pause, change limits, remove), New helper (four steps, ends with the MCP config to paste), Waiting on you (the approval sheet: who, how much, to whom, why it stopped, swipe to approve), Activity and You.
 
-TODO (team): stack, screens, how to run it, and where it points `NEXT_PUBLIC_API_BASE`.
+It was built against a contract, not against the backend: `frontend/src/api/types.ts` and `frontend/contract/openapi.yaml` describe every shape, `frontend/src/api/mock.ts` is an in-memory fake that behaves like the real thing, and `frontend/src/api/http.ts` is the adapter for a real server. With no `VITE_API_URL` the app runs on the sample data. With `VITE_API_URL=<backend>/v1` it talks to the backend, which serves that contract (see Architecture). Sign-in is the demo passcode; the backend answers with the owner token, which the app sends as a bearer on every call; the event stream is opened with a one-time ticket from `POST /v1/events/ticket`, so the token never appears in a URL.
+
+Changes made when wiring it to the real backend: a sign-in page (`src/pages/Login.tsx`), a redirect to it on 401, no event stream until signed in, polling beside the event stream, a "Blocked" label for payments the gate stopped, and `preview.allowedHosts` for the demo tunnel. Everything else is the handover as delivered.
+
+Two names differ between the two sides on purpose. The gate's limit is per 24 hours; the UI calls the same number a weekly allowance. The gate's red light has no flag of its own in the UI's contract; the phone shows it as declined with a `Blocked: …` memo, and the full reasons stay in the gate's API and in the MCP reply.
 
 ## What's next
 
@@ -155,4 +170,6 @@ TODO (team): stack, screens, how to run it, and where it points `NEXT_PUBLIC_API
 
 ## Team
 
-TODO: team names.
+- **Frank Tsai**: product spec, the gate and its rules, backend, MCP server, the adapter that serves the phone app's contract, tests. Built with Claude Code.
+- **Marco**: the Sigil phone app, its contract and mock, and the brand.
+- TODO (Frank): confirm the rest of the team and what each person built.

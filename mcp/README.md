@@ -7,7 +7,7 @@ It holds only the agent token. No owner token and no keys, so Claude can't appro
 ## Use
 
 ```bash
-cd mcp-backup && npm install
+cd mcp && npm install
 ```
 
 Claude Desktop → Settings → Developer → Edit Config, then add:
@@ -17,7 +17,7 @@ Claude Desktop → Settings → Developer → Edit Config, then add:
   "mcpServers": {
     "ai-pay-gate": {
       "command": "node",
-      "args": ["/ABSOLUTE/PATH/TO/ai-pay-gate/mcp-backup/index.mjs"],
+      "args": ["/ABSOLUTE/PATH/TO/ai-pay-gate/mcp/index.mjs"],
       "env": {
         "API_BASE": "https://<backend url>/api/v1",
         "AGENT_TOKEN": "<agent token from Frank>"

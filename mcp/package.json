@@ -1,5 +1,5 @@
 {
-  "name": "ai-pay-gate-mcp-backup",
+  "name": "ai-pay-gate-mcp",
   "private": true,
   "type": "module",
   "description": "Backup MCP server: gives Claude Desktop the agent tools of the AI Payment Gate backend. Holds only the agent token.",

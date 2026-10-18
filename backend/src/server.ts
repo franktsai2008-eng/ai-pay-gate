@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import { app } from "./routes.js";
+import { root as app } from "./app.js";
 import { flush } from "./store.js";
 import { tick } from "./engine.js";
 
@@ -25,4 +25,4 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-serve({ fetch: app.fetch, port }, (info) => console.log(`AI Payment Gate backend on http://localhost:${info.port}/api/v1`));
+serve({ fetch: app.fetch, port }, (info) => console.log(`AI Payment Gate backend on http://localhost:${info.port}/api/v1 (Sigil UI contract on /v1)`));
