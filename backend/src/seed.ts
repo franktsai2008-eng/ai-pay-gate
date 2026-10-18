@@ -50,7 +50,8 @@ export function buildSeed(t: number): State {
   const owner = (id: string, name: string, badgeLevel: 0 | 1 | 2 | 3, token: string) => {
     s.owners[id] = { id, name, email: `${name.toLowerCase().replace(/\W+/g, "")}@example.com`, badgeLevel, withdrawAddress: ADDR.miaOwner, token };
   };
-  owner("own_mia", "Mia", 2, "owner_demo_mia");
+  // On a public deploy, set OWNER_TOKEN / AGENT_TOKEN so the documented demo tokens don't work there.
+  owner("own_mia", "Mia", 2, process.env.OWNER_TOKEN || "owner_demo_mia");
   owner("own_feedco", "PriceFeed Co owner", 2, "owner_demo_feedco");
   owner("own_replab", "MarketReport Lab owner", 2, "owner_demo_replab");
   owner("own_quick", "QuickData owner", 1, "owner_demo_quick");
@@ -68,7 +69,7 @@ export function buildSeed(t: number): State {
     name: "Mia's Claude",
     walletAddress: ADDR.miaAgent,
     balanceMicro: 50 * M,
-    token: "agent_demo_mia",
+    token: process.env.AGENT_TOKEN || "agent_demo_mia",
     buyerTrust: 0.8,
     rules: {
       autonomy: "small_auto",

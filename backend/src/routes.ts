@@ -88,8 +88,14 @@ app.get("/health", (c) => c.json({ ok: true, time: new Date(now()).toISOString()
 
 // ======================= owner =======================
 
+const DEMO_PASSCODE = process.env.DEMO_PASSCODE ?? "demo";
+
 app.post("/owner/login", async (c) => {
-  const owner = state.owners.own_mia; // demo: any email logs in as Mia
+  // Demo login: one fixed account (Mia), protected by a passcode set on the server.
+  // Production replaces this with email magic link / passkey and a fresh session token per login.
+  const { passcode } = await body<{ email?: string; passcode?: string }>(c);
+  if (passcode !== DEMO_PASSCODE) throw new ApiError(401, "UNAUTHORIZED", "Wrong passcode.");
+  const owner = state.owners.own_mia;
   return c.json({ token: owner.token, owner: { id: owner.id, name: owner.name, badgeLevel: owner.badgeLevel } });
 });
 
@@ -99,6 +105,8 @@ app.get("/owner/me", (c) => {
   return c.json({ owner: { id: owner.id, name: owner.name, badgeLevel: owner.badgeLevel, withdrawAddress: owner.withdrawAddress }, agents: agents.map(agentView) });
 });
 
+// DEMO ONLY: verification is mocked per SPEC (the screen is real, the result is fake).
+// Production raises badgeLevel only from a signed provider callback (World ID, Coinbase, ID vendor, KYB).
 app.post("/owner/verify", async (c) => {
   const owner = ownerAuth(c);
   const { method } = await body<{ method?: string }>(c);

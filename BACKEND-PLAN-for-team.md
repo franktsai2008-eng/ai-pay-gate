@@ -46,6 +46,7 @@ Owner web app (Next.js, frontend team) ──HTTP, polling──> Backend API (N
 
 - One backend service. All state in memory, saved to a JSON snapshot. `POST /api/v1/admin/reset` restores the demo seed.
 - Live updates: **poll** `GET /api/v1/owner/feed?since=<cursor>` every 2 seconds. No websockets.
+- Code: private repo `github.com/franktsai2008-eng/ai-pay-gate` (ask Frank for access). Run the backend yourself: `cd backend && npm install && npm run dev` → `http://localhost:8787/api/v1/health`. Tests: `npm test`.
 - Backend URL: local `http://localhost:8787` while building. A cloud URL comes once Frank approves the deploy. Put the base URL in one env var (`NEXT_PUBLIC_API_BASE`).
 
 ## 4. Conventions
@@ -87,7 +88,7 @@ The agent token can **only** call `/agent/*`. It can never approve, change rules
 | check | hard (red) | soft (yellow) |
 |---|---|---|
 | source | `OUTSIDE_INSTRUCTION` | `UNKNOWN_ORIGIN` |
-| rules | `CAP_PER_TX`, `CAP_DAILY`, `AGENT_PAUSED`, `CATEGORY_BLOCKED` | `AUTO_TOTAL_24H` |
+| rules | `CAP_PER_TX`, `CAP_DAILY`, `BUDGET_EMPTY`, `AGENT_PAUSED`, `CATEGORY_BLOCKED` | `AUTO_TOTAL_24H` |
 | payee | `PAYEE_SCAM_LIST`, `PAYEE_SANCTIONED`, `PAYTO_CHANGED`, `SELLER_AT_LIMIT`, `PAYEE_SUSPENDED` | `NEW_PAYEE`, `PAYEE_UNVERIFIED`, `PAYEE_LOW_SCORE`, `LEVEL1_LARGE_ORDER`, `PAYEE_RESTRICTED` |
 | flow | `DIRECT_BAD_LINK` | `YOUNG_WALLET`, `NEAR_BAD`, `RING`, `PASS_THROUGH` |
 | simulation | `SIM_MISMATCH`, `UNLIMITED_APPROVAL` | |
@@ -105,7 +106,7 @@ The agent token can **only** call `/agent/*`. It can never approve, change rules
 Grouped by screen.
 
 ### Login
-`POST /owner/login` body `{"email": "mia@example.com"}` → `{"token": "owner_demo_mia", "owner": {…}}`. Demo: any email logs in as Mia.
+`POST /owner/login` body `{"email": "mia@example.com", "passcode": "…"}` → `{"token": "…", "owner": {…}}`. Demo: one account (Mia). The passcode is `demo` locally; on the deployed server Frank gives you the passcode, and the owner/agent tokens there are different from the defaults in this doc.
 
 `GET /owner/me` →
 ```json
@@ -139,7 +140,7 @@ Grouped by screen.
 `autonomy`: `"ask_always" | "small_auto" | "allowlist_auto"`. `PUT` the same shape to save (server checks auto ≤ per-tx ≤ daily, returns 400 otherwise). `POST /owner/agents/:id/allowlist` body `{"address": "0x…", "label": "…"}` adds one.
 
 ### Home
-`GET /owner/home` →
+`GET /owner/home` (optional `?agentId=agt_mia`) →
 ```json
 {
   "balanceMicro": 49950000, "balanceUsd": "$49.95",
@@ -198,7 +199,7 @@ Draw this as the loop chart.
 `POST /owner/reports` body `{"paymentId": "pay_…", "note": "scam"}` → `{"ok": true}`.
 
 ### Ledger
-`GET /owner/payments` → list of payment summaries (newest first). `GET /owner/payments/:id` →
+`GET /owner/payments` → list of payment summaries (newest first; add `?includePast=1` to include Mia's 20 seeded past payments). `GET /owner/payments/:id` →
 ```json
 {
   "payment": { "id": "pay_…", "status": "paid", "light": "green", "amountUsd": "$0.05", "txHash": "sim_0x…", "createdAt": "…" },
