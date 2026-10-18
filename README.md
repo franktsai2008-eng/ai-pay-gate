@@ -334,6 +334,5 @@ Two names differ between the two sides on purpose. The gate's limit is per 24 ho
 
 ## Team
 
-- **Frank Tsai**: product spec, the gate and its rules, backend, MCP server, the adapter that serves the phone app's contract, tests. Built with Claude Code.
-- **Marco**: the Sigil phone app, its contract and mock, and the brand.
-- TODO (Frank): confirm the rest of the team and what each person built.
+- **Frank Tsai** and **Issac**: from idea to backend. The product spec, the gate and its rules, the credit and risk scores, the MCP server, the adapter that serves the phone app's contract, and the tests. Built with Claude Code.
+- **Marco**: design, and the Sigil phone app with its contract, mock and brand.
