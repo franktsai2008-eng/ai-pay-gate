@@ -20,6 +20,8 @@ export interface Owner {
   badgeLevel: BadgeLevel;
   withdrawAddress: string;
   token: string;
+  /** real time (not the demo clock) of the last passcode login; sensitive changes need a recent one */
+  lastLoginAt?: number;
 }
 
 export interface Rules {
@@ -54,9 +56,23 @@ export interface Agent {
   token: string;
   rules?: Rules;
   seller?: SellerProfile;
-  /** buyer trust (0..1), refreshed nightly in production; seeded for the demo */
+  /** buyer trust (0..1): last value from credit.computeTrust (at order close and in the nightly recompute) */
   buyerTrust: number;
+  /** audited account: a seed that trust spreads out from */
+  preTrusted?: boolean;
+  /** confirmed fraud by arbitration (SPEC 5); only arbitration sets this, never the risk score */
+  banned?: { at: number; note: string };
+  /** risk points (SPEC 5): internal; told to the owner, never shown on the public profile */
+  risk?: { points: number; level: RiskLevel; reasons: RiskReason[]; at: number };
   riskStatus: "none" | "restricted" | "suspended";
+}
+
+export type RiskLevel = "none" | "watch" | "restricted" | "suspended";
+
+export interface RiskReason {
+  code: string;
+  points: number;
+  message: string;
 }
 
 export interface Listing {
@@ -139,6 +155,12 @@ export interface Trade {
   factors: { outcome: number; amount: number; evidence: number; independence: number; buyerTrust: number; pair: number };
   points: number;
   at: number;
+  /** how the goods were delivered (evidence factor); pre-demo trades count as "pipe" */
+  route?: "pipe" | "link" | "offplatform";
+  /** plain-language reason for each factor, shown on the public profile (no names or addresses) */
+  notes?: { outcome: string; evidence: string; independence: string; buyerTrust: string; pair: string };
+  independenceCode?: string;
+  recomputedAt?: number;
 }
 
 export interface TaintEntry {
@@ -157,6 +179,8 @@ export interface WalletInfo {
   createdAt: number;
   fundedBy: string[];
   verifiedOwnerWallet?: boolean;
+  /** owner this verified wallet belongs to */
+  ownerId?: string;
   exchange?: boolean;
   scamList?: boolean;
   sanctioned?: boolean;
@@ -166,6 +190,21 @@ export interface WalletInfo {
 export interface Graph {
   nodes: { id: string; label: string; kind: string }[];
   edges: { from: string; to: string; label: string }[];
+}
+
+/** One gate decision, append-only and hash-chained (SPEC 10): what came in, which rules, what came out. */
+export interface DecisionLogEntry {
+  seq: number;
+  at: number;
+  stage: "request" | "recheck";
+  paymentId: string;
+  agentId: string;
+  input: { source: "offer" | "raw"; offerId: string | null; payTo: string; amountMicro: number; memo: string | null };
+  rulesVersion: number;
+  light: Light;
+  reasons: { check: CheckName; code: string; severity: Severity; message: string }[];
+  prevHash: string;
+  hash: string;
 }
 
 export interface FeedEvent {
@@ -192,4 +231,10 @@ export interface State {
   graphs: Record<string, Graph>;
   events: FeedEvent[];
   reports: { id: string; ownerId: string; paymentId: string; note: string; at: number }[];
+  /** last nightly recompute (demo clock); undefined means run it on the next tick */
+  lastRecomputeAt?: number;
+  /** append-only gate decision log; optional so older snapshots still load */
+  decisionLog?: DecisionLogEntry[];
+  /** last entry's seq and hash, kept apart from the log so cutting entries off the end shows; production publishes it */
+  decisionHead?: { seq: number; hash: string };
 }

@@ -124,3 +124,12 @@ test("rules validation and agent scope", async () => {
   const feed = await call("GET", "/owner/feed", OWNER);
   assert.ok(Array.isArray(feed.json.events));
 });
+
+test("offer search matches every word, including the seller name", async () => {
+  store.resetState();
+  const ids = async (q: string) => (await call("GET", `/agent/offers?q=${encodeURIComponent(q)}`, AGENT)).json.offers.map((o: { id: string }) => o.id);
+  assert.deepEqual(await ids("QuickData price feed"), ["lst_scam"]);
+  assert.deepEqual(await ids("real time price feed"), ["lst_scam"]);
+  assert.deepEqual(await ids("crypto prices"), ["lst_feed"]);
+  assert.deepEqual(await ids("market report"), ["lst_report"]);
+});

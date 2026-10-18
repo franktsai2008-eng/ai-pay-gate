@@ -12,17 +12,22 @@ import {
   orderView,
   ownerOf,
   pauseAgent,
+  recomputeAll,
+  confirmFraud,
+  verifyDecisionLog,
   payeeSummary,
   paymentDetail,
   paymentSummary,
   recordTaint,
   reject,
   resolveRequest,
+  sellerExposureMicro,
   spentSince,
   timewarp,
 } from "./engine.js";
 import { now, shortAddr } from "./store.js";
 import { addr } from "./seed.js";
+import { computeTrust } from "./credit.js";
 
 const DAY = 86_400_000;
 const ADMIN_KEY = process.env.ADMIN_KEY ?? "demo-admin";
@@ -90,19 +95,43 @@ app.get("/health", (c) => c.json({ ok: true, time: new Date(now()).toISOString()
 
 const DEMO_PASSCODE = process.env.DEMO_PASSCODE ?? "demo";
 
+/** Wrong passcodes per client: 10 in 10 minutes, then wait. Per client, so nobody can lock Mia out from elsewhere. */
+const wrongTries = new Map<string, number[]>();
+function checkPasscode(c: Context, passcode: string | undefined): boolean {
+  const who = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  const t = Date.now();
+  const recent = (wrongTries.get(who) ?? []).filter((x) => t - x < 10 * 60_000);
+  if (recent.length >= 10) throw new ApiError(429, "TOO_MANY_ATTEMPTS", "Too many wrong passcodes. Try again in a few minutes.");
+  if (passcode === DEMO_PASSCODE) return true;
+  wrongTries.set(who, [...recent, t]);
+  return false;
+}
+
 app.post("/owner/login", async (c) => {
   // Demo login: one fixed account (Mia), protected by a passcode set on the server.
   // Production replaces this with email magic link / passkey and a fresh session token per login.
   const { passcode } = await body<{ email?: string; passcode?: string }>(c);
-  if (passcode !== DEMO_PASSCODE) throw new ApiError(401, "UNAUTHORIZED", "Wrong passcode.");
+  if (!checkPasscode(c, passcode)) throw new ApiError(401, "UNAUTHORIZED", "Wrong passcode.");
   const owner = state.owners.own_mia;
+  owner.lastLoginAt = Date.now();
+  markDirty();
   return c.json({ token: owner.token, owner: { id: owner.id, name: owner.name, badgeLevel: owner.badgeLevel } });
 });
 
 app.get("/owner/me", (c) => {
   const owner = ownerAuth(c);
   const agents = Object.values(state.agents).filter((a) => a.ownerId === owner.id && a.rules);
-  return c.json({ owner: { id: owner.id, name: owner.name, badgeLevel: owner.badgeLevel, withdrawAddress: owner.withdrawAddress }, agents: agents.map(agentView) });
+  const trust = computeTrust().buyers;
+  return c.json({
+    owner: { id: owner.id, name: owner.name, badgeLevel: owner.badgeLevel, withdrawAddress: owner.withdrawAddress },
+    // buyerTrust: how much this AI's ratings count for sellers. Owner-only: the reason mentions spending.
+    // risk: told to the owner (SPEC 5 "every step tells the person why"); never on the public profile.
+    agents: agents.map((a) => ({
+      ...agentView(a),
+      buyerTrust: { value: trust.get(a.id)?.value ?? 0, reason: trust.get(a.id)?.reason ?? "" },
+      risk: { level: a.risk?.level ?? "none", points: a.risk?.points ?? 0, reasons: a.risk?.reasons ?? [] },
+    })),
+  });
 });
 
 // DEMO ONLY: verification is mocked per SPEC (the screen is real, the result is fake).
@@ -117,8 +146,15 @@ app.post("/owner/verify", async (c) => {
   return c.json({ badgeLevel: owner.badgeLevel });
 });
 
+/** SPEC 5: a ban follows the person, so a banned owner can't start over with a new AI. */
+function refuseIfBanned(ownerId: string) {
+  if (Object.values(state.agents).some((a) => a.ownerId === ownerId && a.banned))
+    throw new ApiError(403, "BANNED", "This account was banned after a confirmed fraud.");
+}
+
 app.post("/owner/agents", async (c) => {
   const owner = ownerAuth(c);
+  refuseIfBanned(owner.id);
   const { name } = await body<{ name?: string }>(c);
   const count = Object.values(state.agents).filter((a) => a.ownerId === owner.id && a.rules).length;
   const cap = owner.badgeLevel === 3 ? 100 : 10;
@@ -134,7 +170,7 @@ app.post("/owner/agents", async (c) => {
     walletAddress: wallet,
     balanceMicro: 0,
     token,
-    buyerTrust: 0.3,
+    buyerTrust: 0,
     riskStatus: "none",
     rules: { autonomy: "ask_always", autoLimitMicro: 1_000_000, perTxCapMicro: 10_000_000, dailyCapMicro: 20_000_000, autoTotal24hMicro: 5_000_000, allowlist: [], categories: ["data", "reports", "api"], version: 1 },
   };
@@ -172,9 +208,14 @@ app.post("/owner/agents/:id/withdraw", async (c) => {
   return c.json({ agent: agentView(agent), sentTo: owner.withdrawAddress, txHash: `sim_0x${nextId("wd").padEnd(64, "0").slice(0, 64)}` });
 });
 
+/**
+ * SPEC 7: changing where money can be withdrawn needs the passcode again, every time, so a leaked owner
+ * token alone can't redirect funds. (The demo token is shared and long-lived, so "logged in recently" proves nothing.)
+ */
 app.put("/owner/withdraw-address", async (c) => {
   const owner = ownerAuth(c);
-  const { address } = await body<{ address?: string }>(c);
+  const { address, passcode } = await body<{ address?: string; passcode?: string }>(c);
+  if (!checkPasscode(c, passcode)) throw new ApiError(401, "REAUTH_REQUIRED", "Enter your passcode again to change where money is withdrawn to.");
   if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) throw new ApiError(400, "BAD_REQUEST", "address must be 0x + 40 hex.");
   owner.withdrawAddress = address.toLowerCase();
   markDirty();
@@ -228,7 +269,9 @@ app.post("/owner/agents/:id/pause", (c) => {
 });
 
 app.post("/owner/agents/:id/resume", (c) => {
-  const agent = ownedAgent(ownerAuth(c), c.req.param("id"));
+  const owner = ownerAuth(c);
+  const agent = ownedAgent(owner, c.req.param("id"));
+  refuseIfBanned(owner.id);
   pauseAgent(agent, false);
   return c.json({ agent: agentView(agent) });
 });
@@ -369,10 +412,15 @@ app.post("/owner/reports", async (c) => {
 
 app.get("/agent/offers", (c) => {
   const agent = agentAuth(c);
-  const q = (c.req.query("q") ?? "").toLowerCase();
+  // Every word of q must appear somewhere in the title, category, description or seller name,
+  // so "QuickData price feed" and "real time price feed" both find the listing.
+  const words = (c.req.query("q") ?? "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
   const max = Number(c.req.query("maxPriceMicro") ?? Infinity);
   const offers = Object.values(state.listings)
-    .filter((l) => (!q || `${l.title} ${l.category} ${l.untrustedDescription}`.toLowerCase().includes(q)) && l.priceMicro <= max)
+    .filter((l) => {
+      const text = `${l.title} ${l.category} ${l.untrustedDescription} ${getAgent(l.sellerAgentId).name}`.toLowerCase();
+      return words.every((w) => text.includes(w)) && l.priceMicro <= max;
+    })
     .map((l) => {
       const seller = getAgent(l.sellerAgentId);
       recordTaint(agent.id, l.untrustedDescription, "listing", l.id, seller.name);
@@ -490,6 +538,7 @@ app.get("/public/agents/:id", (c) => {
       outcome: t.outcome,
       amountUsd: usd(t.amountMicro),
       factors: { ...t.factors, freshness: Math.round(Math.pow(0.5, (now() - t.at) / DAY / 90) * 1000) / 1000 },
+      notes: t.notes ?? null,
       points: t.points,
       at: new Date(t.at).toISOString(),
     }));
@@ -507,6 +556,10 @@ app.get("/public/agents/:id", (c) => {
     trades: credit.trades,
     distinctBuyers: credit.distinctBuyers,
     factors: { P: credit.P, N: credit.N },
+    scoreDetail: credit.detail,
+    tierProgress: { tier: credit.tier, multiplier: credit.multiplier, next: credit.nextTier },
+    openOrdersUsd: usd(sellerExposureMicro(agent.id)),
+    lastRecomputedAt: state.lastRecomputeAt ? new Date(state.lastRecomputeAt).toISOString() : null,
     recentTrades: trades,
     graph: wallet?.ring ? state.graphs[wallet.ring] ?? null : null,
     formula: "points = outcome × amount × evidence × independence × buyer trust × freshness (× 1/k for the k-th trade with the same buyer); score = 100 × P ÷ (P + N + 10)",
@@ -528,6 +581,53 @@ app.post("/admin/timewarp", async (c) => {
   if (!Number.isFinite(m) || m <= 0 || m > 60 * 24 * 30) throw new ApiError(400, "BAD_REQUEST", "minutes must be between 0 and 43200.");
   timewarp(m);
   return c.json({ ok: true, clockOffsetMinutes: Math.round(state.clockOffsetMs / 60_000) });
+});
+
+// The nightly re-score, on demand: re-reads the funding graph and trust, re-scores every trade.
+app.post("/admin/recompute", (c) => {
+  adminAuth(c);
+  return c.json(recomputeAll());
+});
+
+// Record a funding link found later ("wallet `from` sent money to wallet `to`"), e.g. to show a sock
+// puppet being caught. Takes effect on the next recompute.
+app.post("/admin/funding", async (c) => {
+  adminAuth(c);
+  const { from, to } = await body<{ from?: string; to?: string }>(c);
+  const isAddr = (x?: string) => Boolean(x && /^0x[a-fA-F0-9]{40}$/.test(x));
+  if (!isAddr(from) || !isAddr(to)) throw new ApiError(400, "BAD_REQUEST", "from and to must be 0x + 40 hex.");
+  const f = from!.toLowerCase();
+  const t = to!.toLowerCase();
+  const wallet = state.wallets[t];
+  if (!wallet) throw new ApiError(404, "NOT_FOUND", "We have no record of the receiving wallet.");
+  if (!wallet.fundedBy.includes(f)) wallet.fundedBy.push(f);
+  markDirty();
+  return c.json({ ok: true, wallet: { address: wallet.address, fundedBy: wallet.fundedBy } });
+});
+
+// Arbitration result: fraud confirmed. Bans every AI of that owner, voids their ratings, spreads risk.
+app.post("/admin/confirm-fraud", async (c) => {
+  adminAuth(c);
+  const { agentId, note } = await body<{ agentId?: string; note?: string }>(c);
+  if (!agentId || !state.agents[agentId]) throw new ApiError(404, "NOT_FOUND", "No such agent.");
+  return c.json(confirmFraud(agentId, note ?? "Fraud confirmed by arbitration."));
+});
+
+// Risk review list (SPEC 5): everyone with risk points, highest first. Internal only.
+app.get("/admin/risk", (c) => {
+  adminAuth(c);
+  const rows = Object.values(state.agents)
+    .filter((a) => a.banned || (a.risk && a.risk.points > 0))
+    .sort((a, b) => (b.risk?.points ?? 0) - (a.risk?.points ?? 0))
+    .map((a) => ({ agentId: a.id, name: a.name, banned: Boolean(a.banned), level: a.risk?.level ?? "none", points: a.risk?.points ?? 0, reasons: a.risk?.reasons ?? [] }));
+  return c.json({ agents: rows });
+});
+
+// Is the decision log intact? Re-walks the hash chain.
+app.get("/admin/decision-log", (c) => {
+  adminAuth(c);
+  const log = state.decisionLog ?? [];
+  return c.json({ ...verifyDecisionLog(), latest: log.slice(-5).reverse() });
 });
 
 app.get("/admin/state", (c) => {

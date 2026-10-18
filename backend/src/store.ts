@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FeedEvent, State } from "./types.js";
-import { buildSeed } from "./seed.js";
+import { AUDITED_AGENT_IDS, buildSeed } from "./seed.js";
 
 const DATA_DIR = process.env.DATA_DIR ?? join(process.cwd(), "data");
 const SNAPSHOT = join(DATA_DIR, "state.json");
@@ -12,7 +12,12 @@ let dirty = false;
 
 function load(): State {
   try {
-    if (existsSync(SNAPSHOT)) return JSON.parse(readFileSync(SNAPSHOT, "utf8")) as State;
+    if (existsSync(SNAPSHOT)) {
+      const s = JSON.parse(readFileSync(SNAPSHOT, "utf8")) as State;
+      // Snapshots saved before trust seeds existed: mark the audited sellers, or every trust would be 0.
+      for (const id of AUDITED_AGENT_IDS) if (s.agents[id] && s.agents[id].preTrusted === undefined) s.agents[id].preTrusted = true;
+      return s;
+    }
   } catch (err) {
     console.error("snapshot unreadable, reseeding", err);
   }

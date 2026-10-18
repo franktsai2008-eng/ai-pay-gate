@@ -1,7 +1,9 @@
-import type { Agent, Approval, Graph, Light, Listing, Order, Outcome, Payment, Reason, Rules, Trade } from "./types.js";
+import type { Agent, Approval, DecisionLogEntry, Graph, Light, Listing, Order, Outcome, Payment, Reason, Rules, Trade } from "./types.js";
 import { markDirty, nextId, now, pushEvent, sha256, shortAddr, state, usd } from "./store.js";
 import { runJudge } from "./judge.js";
 import { ADDR } from "./seed.js";
+import { riskOf } from "./risk.js";
+import { computeTrust, fundedWallets, fundingAncestors, independenceDetail, isKnownBad, looksPassThrough, purchases } from "./credit.js";
 
 const MIN = 60_000;
 const HOUR = 3_600_000;
@@ -9,6 +11,8 @@ const DAY = 86_400_000;
 const APPROVAL_TTL = 10 * MIN;
 const SIGNATURE_TTL = 2 * MIN;
 const DUPLICATE_WINDOW = 10 * MIN;
+/** SPEC 6: an owner who only has a wallet (level 0) can spend at most this much a day. */
+const UNVERIFIED_DAILY_MICRO = 5_000_000;
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) {
@@ -77,16 +81,7 @@ export function freshness(at: number): number {
 }
 
 export function independence(buyer: Agent, seller: Agent): number {
-  if (buyer.ownerId === seller.ownerId) return 0;
-  const bw = state.wallets[buyer.walletAddress];
-  const sw = state.wallets[seller.walletAddress];
-  if (!bw) return 0.3;
-  if (bw.fundedBy.includes(seller.walletAddress)) return 0;
-  if (sw && sw.fundedBy.some((f) => bw.fundedBy.includes(f) && !state.wallets[f]?.exchange)) return 0;
-  if (bw.ring) return 0;
-  const funders = bw.fundedBy.map((f) => state.wallets[f]).filter(Boolean);
-  if (funders.some((f) => f!.exchange || f!.verifiedOwnerWallet)) return 1;
-  return 0.3;
+  return independenceDetail(buyer, seller).value;
 }
 
 const TIERS = [
@@ -94,37 +89,89 @@ const TIERS = [
   { tier: 2, score: 60, buyers: 20, level: 2, mult: 2 },
   { tier: 1, score: 30, buyers: 5, level: 1, mult: 1 },
 ];
+const TIER0_MULT = 0.5;
+const WEEKLY_GAIN_CAP = 10;
+
+function scoreOf(P: number, N: number): number {
+  return (100 * P) / (P + N + 10);
+}
+
+/** P and N from the seeded baseline plus every trade, with freshness applied as of time `at`. */
+function sums(agentId: string, at: number) {
+  const seller = state.agents[agentId]?.seller;
+  let tradesP = 0;
+  let tradesN = 0;
+  for (const t of state.trades) {
+    if (t.sellerAgentId !== agentId || t.at > at) continue;
+    const v = t.points * Math.pow(0.5, (at - t.at) / DAY / 90);
+    if (v >= 0) tradesP += v;
+    else tradesN += -v;
+  }
+  const baselineP = seller?.baselineP ?? 0;
+  const baselineN = seller?.baselineN ?? 0;
+  return { baselineP, baselineN, tradesP, tradesN, P: baselineP + tradesP, N: baselineN + tradesN };
+}
 
 export function creditOf(agentId: string) {
   const agent = getAgent(agentId);
   const seller = agent.seller;
-  const trades = state.trades.filter((t) => t.sellerAgentId === agentId);
-  let P = seller?.baselineP ?? 0;
-  let N = seller?.baselineN ?? 0;
-  for (const t of trades) {
-    const v = t.points * freshness(t.at);
-    if (v >= 0) P += v;
-    else N += -v;
-  }
-  const raw = (100 * P) / (P + N + 10);
-  const cap = seller ? seller.scoreWeekAgo + 10 : 100;
-  const score = Math.max(0, Math.min(raw, Math.max(cap, 0)));
-  const distinctBuyers = (seller?.baselineDistinctBuyers ?? 0) + new Set(trades.filter((t) => t.points > 0).map((t) => t.buyerAgentId)).size;
+  const t = now();
+  const trades = state.trades.filter((x) => x.sellerAgentId === agentId);
+  const s = sums(agentId, t);
+  const raw = scoreOf(s.P, s.N);
+  // Score may rise at most 10 points a week. Seeded sellers carry last week's score; others are recomputed.
+  const lastWeek = seller?.scoreWeekAgo === undefined ? sums(agentId, t - 7 * DAY) : null;
+  const weekAgo = seller?.scoreWeekAgo ?? scoreOf(lastWeek!.P, lastWeek!.N);
+  const weekCap = weekAgo + WEEKLY_GAIN_CAP;
+  const score = Math.max(0, Math.min(raw, weekCap));
+  // "Distinct real buyers" = distinct verified owners (level 1+) whose trades earned points.
+  const realBuyers = new Set(
+    trades
+      .filter((x) => x.points > 0)
+      .map((x) => state.agents[x.buyerAgentId])
+      .filter((b) => b && (state.owners[b.ownerId]?.badgeLevel ?? 0) >= 1)
+      .map((b) => b!.ownerId),
+  );
+  const distinctBuyers = (seller?.baselineDistinctBuyers ?? 0) + realBuyers.size;
   const level = ownerOf(agent).badgeLevel;
   const hit = TIERS.find((x) => score >= x.score && distinctBuyers >= x.buyers && level >= x.level);
-  const tier = hit?.tier ?? 0;
-  const mult = hit?.mult ?? 0.5;
+  // Banned: score and limit go to zero. Restricted by risk (SPEC 5): one tier lower until it clears.
+  const earnedTier = agent.banned ? 0 : (hit?.tier ?? 0);
+  const tier = agent.riskStatus === "restricted" ? Math.max(0, earnedTier - 1) : earnedTier;
+  const mult = agent.banned ? 0 : (TIERS.find((x) => x.tier === tier)?.mult ?? TIER0_MULT);
   const depositMicro = seller?.depositMicro ?? 0;
+  const next = TIERS.find((x) => x.tier === tier + 1);
   return {
-    P: round(P, 3),
-    N: round(N, 3),
-    score: round(score, 2),
+    P: round(s.P, 3),
+    N: round(s.N, 3),
+    score: agent.banned ? 0 : round(score, 2),
     tier,
     multiplier: mult,
     depositMicro,
     openOrderLimitMicro: Math.round(depositMicro * mult),
     trades: (seller?.baselineTrades ?? 0) + trades.length,
     distinctBuyers,
+    detail: {
+      baselineP: round(s.baselineP, 3),
+      baselineN: round(s.baselineN, 3),
+      tradesP: round(s.tradesP, 4),
+      tradesN: round(s.tradesN, 4),
+      rawScore: round(raw, 2),
+      scoreWeekAgo: round(weekAgo, 2),
+      weeklyCap: round(weekCap, 2),
+      cappedByWeeklyLimit: raw > weekCap,
+    },
+    nextTier: next
+      ? {
+          tier: next.tier,
+          multiplier: next.mult,
+          requirements: [
+            { key: "score", label: `Score ${next.score}+`, have: Math.round(score), need: next.score, met: score >= next.score },
+            { key: "distinctBuyers", label: `${next.buyers} different verified buyers`, have: distinctBuyers, need: next.buyers, met: distinctBuyers >= next.buyers },
+            { key: "badgeLevel", label: `Owner verified at level ${next.level}+`, have: level, need: next.level, met: level >= next.level },
+          ],
+        }
+      : null,
   };
 }
 
@@ -202,10 +249,19 @@ export function evaluate(agent: Agent, r: Resolved, opts: { excludePaymentId?: s
   }
 
   // 2. owner rules
-  if (agent.status === "paused") hard("rules", "AGENT_PAUSED", `${owner.name} paused this AI. All payments are blocked.`);
+  if (agent.banned) hard("rules", "AGENT_PAUSED", "This AI's owner was banned after a confirmed fraud. All payments are blocked.");
+  else if (agent.status === "paused") hard("rules", "AGENT_PAUSED", `${owner.name} paused this AI. All payments are blocked.`);
   if (r.amountMicro > rules.perTxCapMicro) hard("rules", "CAP_PER_TX", `Over the per-payment limit (${usd(rules.perTxCapMicro)}).`);
   const spent24h = spentSince(agent.id, t - DAY, false, opts.excludePaymentId);
   if (spent24h + r.amountMicro > rules.dailyCapMicro) hard("rules", "CAP_DAILY", `Over the daily limit (${usd(rules.dailyCapMicro)} in 24 hours; ${usd(spent24h)} already spent).`);
+  else if (owner.badgeLevel === 0) {
+    // counted across all of the owner's AIs, so opening more AIs doesn't raise it
+    const ownerSpent = Object.values(state.agents)
+      .filter((a) => a.ownerId === agent.ownerId)
+      .reduce((sum, a) => sum + spentSince(a.id, t - DAY, false, opts.excludePaymentId), 0);
+    if (ownerSpent + r.amountMicro > UNVERIFIED_DAILY_MICRO)
+      hard("rules", "CAP_DAILY", `Unverified owners can spend at most ${usd(UNVERIFIED_DAILY_MICRO)} a day across all their AIs (${usd(ownerSpent)} already spent). Verify your identity to raise this.`, { limit: "unverified" });
+  }
   if (r.amountMicro > agent.balanceMicro) hard("rules", "BUDGET_EMPTY", `Not enough money in this AI's budget wallet (${usd(agent.balanceMicro)} left).`);
   if (r.listing && !rules.categories.includes(r.listing.category)) hard("rules", "CATEGORY_BLOCKED", `${owner.name} doesn't allow buying "${r.listing.category}".`);
   const autoEligible = r.amountMicro <= rules.autoLimitMicro || (rules.autonomy === "allowlist_auto" && allowlisted);
@@ -216,7 +272,8 @@ export function evaluate(agent: Agent, r: Resolved, opts: { excludePaymentId?: s
 
   // 3. payee
   const wallet = state.wallets[payTo] ?? Object.values(state.wallets).find((w) => w.address.toLowerCase() === payTo);
-  if (wallet?.scamList) hard("payee", "PAYEE_SCAM_LIST", "This address is on a scam list.");
+  if (payee?.banned) hard("payee", "PAYEE_SCAM_LIST", `${payeeName} was confirmed as a scammer and is banned.`);
+  else if (wallet?.scamList) hard("payee", "PAYEE_SCAM_LIST", "This address is on a scam list.");
   if (wallet?.sanctioned) hard("payee", "PAYEE_SANCTIONED", "This address is on a sanctions list.");
   if (payee?.riskStatus === "suspended") hard("payee", "PAYEE_SUSPENDED", `${payeeName} is suspended while we review it.`);
   if (payee?.riskStatus === "restricted") soft("payee", "PAYEE_RESTRICTED", `${payeeName} is linked to a banned account and is under restriction.`);
@@ -237,8 +294,11 @@ export function evaluate(agent: Agent, r: Resolved, opts: { excludePaymentId?: s
 
   // 4. fund flow
   if (wallet) {
-    const linkedToScam = [...wallet.fundedBy].some((f) => state.wallets[f]?.scamList);
-    if (linkedToScam) hard("flow", "DIRECT_BAD_LINK", "This wallet was funded directly by a known scam wallet.");
+    const badFunders = [...fundingAncestors(payTo)].filter(([a]) => isKnownBad(a)).sort((x, y) => x[1].hops - y[1].hops);
+    if (badFunders[0]?.[1].hops === 1) hard("flow", "DIRECT_BAD_LINK", "This wallet was funded directly by a wallet on a scam or sanctions list.");
+    else if (badFunders.length) soft("flow", "NEAR_BAD", `This wallet was funded by a listed scam or sanctioned wallet, ${badFunders[0][1].hops} steps back.`);
+    else if (fundedWallets(payTo).some((w) => isKnownBad(w.address))) soft("flow", "NEAR_BAD", "This wallet has sent money to a listed scam or sanctioned wallet.");
+    if (looksPassThrough(wallet, t)) soft("flow", "PASS_THROUGH", "This wallet looks like a pass-through: new, one source of money, and it already sent money on.");
     const ageDays = (t - wallet.createdAt) / DAY;
     if (ageDays < 7) soft("flow", "YOUNG_WALLET", `This wallet is ${Math.max(1, Math.round(ageDays))} day${Math.round(ageDays) === 1 ? "" : "s"} old.`);
     if (wallet.ring) {
@@ -305,6 +365,7 @@ export function createPayment(agent: Agent, req: PayRequest): Payment {
     auto: light === "green",
   };
   state.payments[p.id] = p;
+  logDecision(p, "request", light, reasons);
   const ownerId = agent.ownerId;
   pushEvent(ownerId, "decision.created", { paymentId: p.id, light });
   if (light === "red") {
@@ -321,6 +382,59 @@ export function createPayment(agent: Agent, req: PayRequest): Payment {
   return p;
 }
 
+// ---------- decision log (append-only, hash-chained) ----------
+
+const GENESIS = "0".repeat(64);
+
+function entryHash(e: Omit<DecisionLogEntry, "hash">): string {
+  return sha256(JSON.stringify(e));
+}
+
+/** Appends one gate decision. Nothing ever edits or deletes an entry; each hash covers the one before. */
+function logDecision(p: Payment, stage: DecisionLogEntry["stage"], light: Light, reasons: Reason[]) {
+  const log = (state.decisionLog ??= []);
+  const prevHash = log.length ? log[log.length - 1].hash : GENESIS;
+  const entry: Omit<DecisionLogEntry, "hash"> = {
+    seq: log.length + 1,
+    at: now(),
+    stage,
+    paymentId: p.id,
+    agentId: p.agentId,
+    input: { source: p.source, offerId: p.offerId ?? null, payTo: p.payTo, amountMicro: p.amountMicro, memo: p.memo ?? null },
+    rulesVersion: p.rulesVersion,
+    light,
+    reasons: reasons.map((x) => ({ check: x.check, code: x.code, severity: x.severity, message: x.message })),
+    prevHash,
+  };
+  const hash = entryHash(entry);
+  log.push({ ...entry, hash });
+  state.decisionHead = { seq: entry.seq, hash };
+}
+
+/**
+ * Re-walks the chain and compares its end with the stored head. Catches an edited or removed entry and
+ * entries cut off the end. A full rewrite of log and head together needs the head kept somewhere else:
+ * in production it is published (e.g. on chain) so anyone can compare.
+ */
+export function verifyDecisionLog(): { entries: number; valid: boolean; brokenAt: number | null; headHash: string } {
+  const log = state.decisionLog ?? [];
+  const head = state.decisionHead ?? { seq: 0, hash: GENESIS };
+  let prev = GENESIS;
+  for (const [i, e] of log.entries()) {
+    const { hash, ...rest } = e;
+    if (e.seq !== i + 1 || e.prevHash !== prev || entryHash(rest) !== hash) return { entries: log.length, valid: false, brokenAt: i + 1, headHash: head.hash };
+    prev = hash;
+  }
+  if (head.seq !== log.length || head.hash !== prev) return { entries: log.length, valid: false, brokenAt: log.length + 1, headHash: head.hash };
+  return { entries: log.length, valid: true, brokenAt: null, headHash: head.hash };
+}
+
+export function decisionsFor(paymentId: string) {
+  return (state.decisionLog ?? [])
+    .filter((e) => e.paymentId === paymentId)
+    .map((e) => ({ seq: e.seq, at: new Date(e.at).toISOString(), stage: e.stage, light: e.light, rulesVersion: e.rulesVersion, input: e.input, reasons: e.reasons, hash: e.hash }));
+}
+
 /**
  * Executor. Runs synchronously (no awaits), so check-then-set is atomic in Node's single thread:
  * that is the per-agent lock. Re-checks rules, then "signs" (simulated EIP-3009) and settles.
@@ -331,6 +445,8 @@ export function execute(paymentId: string): Payment {
   const agent = getAgent(p.agentId);
   const recheck = evaluate(agent, { listing: p.offerId ? state.listings[p.offerId] : undefined, payTo: p.payTo, amountMicro: p.amountMicro }, { excludePaymentId: p.id });
   const blocking = recheck.reasons.filter((x) => x.severity === "hard");
+  // recheck entry: red if something changed and now blocks it, green if the executor found it still fine
+  logDecision(p, "recheck", blocking.length ? "red" : "green", blocking);
   if (blocking.length) {
     p.status = "blocked";
     p.light = "red";
@@ -510,19 +626,68 @@ function outcomeValue(outcome: Outcome): number {
   return { accepted: 1, silent: 0.5, refunded: 0, failed: -2, no_result: 0 }[outcome];
 }
 
+const OUTCOME_NOTE: Record<Outcome, string> = {
+  accepted: "The buyer's AI accepted the delivery and nobody overruled it.",
+  silent: "Nobody judged or complained before the window closed (counts half).",
+  refunded: "The seller refunded the buyer.",
+  failed: "The seller lost: nothing delivered in time, or a dispute went against it.",
+  no_result: "No result this time: the delivery check rejected it or it went to the owner unreviewed.",
+};
+/** Public wording for buyer trust: coarse on purpose, so the profile page never reveals what a buyer spent. */
+function publicTrustNote(buyer: Agent, value: number): string {
+  if (buyer.preTrusted) return "The buyer is an audited account.";
+  if (value >= 0.6) return "The buyer has a long record of real purchases at other trusted sellers.";
+  if (value > 0) return "The buyer has some record of real purchases at other trusted sellers.";
+  return "The buyer has no record at other trusted sellers yet, so its rating doesn't count.";
+}
+const EVIDENCE_NOTE = { pipe: "Delivered through us; we kept a hash.", link: "Delivered as a link; we saved a copy on delivery.", offplatform: "Delivered outside our system; no evidence." };
+
+/** Scores one trade from its six factors (SPEC 4). Used when an order closes and in the nightly recompute. */
+function scoreTrade(
+  input: { buyer: Agent; seller: Agent; amountMicro: number; outcome: Outcome; route: "pipe" | "link" | "offplatform"; k: number },
+  ps: ReturnType<typeof purchases>,
+  trust: ReturnType<typeof computeTrust>,
+) {
+  const ov = outcomeValue(input.outcome);
+  // Evidence only scales gains; a loss counts in full because "nothing came through us" is itself evidence.
+  const evidence = ov > 0 ? { pipe: 1, link: 0.7, offplatform: 0 }[input.route] : 1;
+  const ind = independenceDetail(input.buyer, input.seller, ps);
+  const bt = trust.forRating(input.buyer.id, input.seller.id);
+  // Like evidence, buyer trust only scales gains: a seller that never delivers loses points even to a brand-new buyer.
+  // Independence still zeroes a loss to the seller's own account (that's not a real customer), but loose
+  // signals (closed group, unknown funding) don't, so a scammer's first victims still count against it.
+  const trustFactor = ov < 0 ? 1 : bt.value;
+  const indFactor = ov < 0 ? (ind.code === "SAME_OWNER" ? 0 : 1) : ind.value;
+  // A buyer confirmed as a fraudster: its ratings are void (SPEC 5), as false evidence.
+  const voided = Boolean(input.buyer.banned);
+  const amount = amountWeight(input.amountMicro);
+  const factors = { outcome: ov, amount: round(amount, 4), evidence, independence: indFactor, buyerTrust: trustFactor, pair: round(1 / input.k, 4) };
+  const points = voided ? 0 : round(ov * amount * evidence * indFactor * trustFactor * (1 / input.k), 4);
+  const notes = {
+    outcome: OUTCOME_NOTE[input.outcome],
+    evidence: ov > 0 ? EVIDENCE_NOTE[input.route] : "Evidence doesn't reduce a loss.",
+    independence: ind.reason,
+    buyerTrust: voided
+      ? "This buyer was confirmed as a fraudster, so its ratings don't count."
+      : ov < 0
+        ? "Losses count in full, whoever the buyer is."
+        : publicTrustNote(input.buyer, bt.value),
+    pair: input.k === 1 ? "First trade between this buyer and seller." : `Trade number ${input.k} between the same buyer and seller counts 1/${input.k}.`,
+  };
+  return { factors, points, notes, independenceCode: ind.code };
+}
+
 export function closeOrder(o: Order, outcome: Outcome) {
   const buyer = getAgent(o.buyerAgentId);
   const seller = getAgent(o.sellerAgentId);
-  const ov = outcomeValue(outcome);
-  const route = o.delivery?.route ?? "offplatform";
-  const evidence = ov > 0 ? { pipe: 1, link: 0.7, offplatform: 0 }[route] : 1;
-  const ind = independence(buyer, seller);
-  const level = ownerOf(buyer).badgeLevel;
-  const trust = level === 0 ? Math.min(0.2, buyer.buyerTrust) : buyer.buyerTrust;
+  const ps = purchases();
+  const trust = computeTrust(ps);
+  buyer.buyerTrust = trust.buyers.get(buyer.id)?.value ?? 0;
   const k = state.trades.filter((t) => t.sellerAgentId === seller.id && t.buyerAgentId === buyer.id).length + 1;
-  const factors = { outcome: ov, amount: round(amountWeight(o.amountMicro), 4), evidence, independence: ind, buyerTrust: trust, pair: round(1 / k, 4) };
-  const points = round(ov * amountWeight(o.amountMicro) * evidence * ind * trust * (1 / k), 4);
-  const tr: Trade = { id: nextId("trd"), orderId: o.id, sellerAgentId: seller.id, buyerAgentId: buyer.id, amountMicro: o.amountMicro, outcome, factors, points, at: now() };
+  const route = o.delivery?.route ?? "offplatform";
+  const scored = scoreTrade({ buyer, seller, amountMicro: o.amountMicro, outcome, route, k }, ps, trust);
+  const points = scored.points;
+  const tr: Trade = { id: nextId("trd"), orderId: o.id, sellerAgentId: seller.id, buyerAgentId: buyer.id, amountMicro: o.amountMicro, outcome, route, ...scored, at: now() };
   state.trades.push(tr);
   o.status = "closed";
   o.outcome = outcome;
@@ -533,10 +698,94 @@ export function closeOrder(o: Order, outcome: Outcome) {
   markDirty();
 }
 
+/**
+ * Nightly job (SPEC 4): re-score every trade with today's funding graph and trust data, so a buyer
+ * found later to be a sock puppet stops counting, including for trades it already rated.
+ */
+export function recomputeAll() {
+  const ps = purchases();
+  const trust = computeTrust(ps);
+  for (const a of Object.values(state.agents)) a.buyerTrust = trust.buyers.get(a.id)?.value ?? 0;
+  const sellers = Object.values(state.agents).filter((a) => a.seller);
+  const scoreBefore = new Map(sellers.map((a) => [a.id, creditOf(a.id).score]));
+  const seenPairs = new Map<string, number>();
+  const changedTrades: { tradeId: string; sellerAgentId: string; pointsBefore: number; pointsAfter: number; why: string }[] = [];
+  const t = now();
+  for (const tr of [...state.trades].sort((a, b) => a.at - b.at)) {
+    const buyer = state.agents[tr.buyerAgentId];
+    const seller = state.agents[tr.sellerAgentId];
+    if (!buyer || !seller) continue;
+    const pair = `${buyer.id}>${seller.id}`;
+    const k = (seenPairs.get(pair) ?? 0) + 1;
+    seenPairs.set(pair, k);
+    const scored = scoreTrade({ buyer, seller, amountMicro: tr.amountMicro, outcome: tr.outcome, route: tr.route ?? "pipe", k }, ps, trust);
+    if (scored.points !== tr.points) {
+      const why = scored.factors.independence !== tr.factors.independence ? scored.notes.independence : scored.notes.buyerTrust;
+      changedTrades.push({ tradeId: tr.id, sellerAgentId: seller.id, pointsBefore: tr.points, pointsAfter: scored.points, why });
+    }
+    Object.assign(tr, scored, { recomputedAt: t });
+    if (tr.orderId && state.orders[tr.orderId]) state.orders[tr.orderId].pointsAdded = tr.points;
+  }
+  state.lastRecomputeAt = t;
+  const risk = applyRisk(ps);
+  markDirty();
+  const sellerScores = sellers
+    .map((a) => ({ agentId: a.id, name: a.name, scoreBefore: scoreBefore.get(a.id)!, scoreAfter: creditOf(a.id).score }))
+    .filter((x) => x.scoreBefore !== x.scoreAfter);
+  return { recomputedAt: new Date(t).toISOString(), trades: state.trades.length, changedTrades, sellerScores, riskChanges: risk };
+}
+
+/** Recomputes every account's risk points and applies the result (SPEC 5). Never bans: only arbitration does. */
+export function applyRisk(ps: ReturnType<typeof purchases> = purchases()) {
+  const t = now();
+  const changes: { agentId: string; name: string; before: string; after: string; points: number }[] = [];
+  for (const a of Object.values(state.agents)) {
+    if (a.banned) continue;
+    const r = riskOf(a, ps, t);
+    const before = a.risk?.level ?? "none";
+    a.risk = { ...r, at: t };
+    // "watch" is internal only; the gate sees restricted (yellow) and suspended (red)
+    a.riskStatus = r.level === "restricted" || r.level === "suspended" ? r.level : "none";
+    if (before !== r.level) {
+      changes.push({ agentId: a.id, name: a.name, before, after: r.level, points: r.points });
+      pushEvent(a.ownerId, "risk.updated", { agentId: a.id, level: r.level, points: r.points });
+    }
+  }
+  markDirty();
+  return changes;
+}
+
+/**
+ * Arbitration confirmed fraud (SPEC 3.7, 5). The ban follows the person: every AI of the same owner is banned.
+ * Their wallets go on our scam list, their ratings of others are voided, their own score drops to 0,
+ * and risk spreads to linked accounts.
+ */
+export function confirmFraud(agentId: string, note: string) {
+  const x = getAgent(agentId);
+  const t = now();
+  const banned = Object.values(state.agents).filter((a) => a.ownerId === x.ownerId && !a.banned);
+  for (const a of banned) {
+    a.banned = { at: t, note: note.slice(0, 300) };
+    a.riskStatus = "suspended";
+    a.risk = { points: 100, level: "suspended", reasons: [{ code: "BANNED", points: 100, message: "Fraud confirmed by arbitration." }], at: t };
+    const w = state.wallets[a.walletAddress.toLowerCase()];
+    if (w) w.scamList = true;
+    if (a.rules) pauseAgent(a, true);
+  }
+  const recompute = recomputeAll();
+  return {
+    banned: banned.map((a) => ({ agentId: a.id, name: a.name })),
+    ratingsVoided: recompute.changedTrades.filter((c) => banned.some((b) => state.trades.find((tr) => tr.id === c.tradeId)?.buyerAgentId === b.id)).length,
+    sellerScores: recompute.sellerScores,
+    riskChanges: recompute.riskChanges,
+  };
+}
+
 // ---------- background jobs (called every second) ----------
 
 export function tick() {
   const t = now();
+  if (state.lastRecomputeAt === undefined || t - state.lastRecomputeAt >= DAY) recomputeAll();
   for (const a of Object.values(state.approvals)) {
     if (a.status === "pending" && t >= a.expiresAt) {
       a.status = "expired";
@@ -618,6 +867,7 @@ export function paymentDetail(p: Payment) {
     payment: { ...paymentSummary(p), id: p.id, txHash: p.txHash ?? null, criteria: p.criteria ?? null, failMessage: p.failMessage ?? null },
     payee: payeeSummary(p.payTo),
     decision: { light: p.light, reasons: p.reasons, rulesVersion: p.rulesVersion },
+    decisionLog: decisionsFor(p.id),
     approval: approval ? { id: approval.id, status: approval.status, expiresAt: new Date(approval.expiresAt).toISOString() } : null,
     order: order ? orderView(order) : null,
   };

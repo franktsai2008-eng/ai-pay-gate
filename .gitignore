@@ -3,3 +3,9 @@ backend/data/
 .env
 *.log
 .DS_Store
+
+# internal notes, kept local only
+HANDOFF.md
+NOTE-for-Shrey.md
+PLAN-zh-2026-10-17.md
+DEVPOST-draft.md
